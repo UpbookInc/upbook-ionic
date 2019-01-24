@@ -1,8 +1,8 @@
 {
     "name": "upbook",
     "version": "0.0.1",
-    "author": "Ionic Framework",
-    "homepage": "http://ionicframework.com/",
+    "author": "UpBook Inc",
+    "homepage": "upbook.us",
     "scripts": {
         "ng": "ng",
         "start": "ng serve",
@@ -73,7 +73,8 @@
             "ionic-plugin-deeplinks": {
                 "URL_SCHEME": "upbook",
                 "DEEPLINK_SCHEME": "https",
-                "DEEPLINK_HOST": "fractalstack.com/"
+                "DEEPLINK_HOST": "fractalstack.com",
+                "ANDROID_PATH_PATTERN": "/upbook/.*"
             },
             "cordova-plugin-device": {},
             "cordova-plugin-ionic-keyboard": {},
