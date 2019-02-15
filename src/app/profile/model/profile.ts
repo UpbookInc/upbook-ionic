@@ -1,7 +1,11 @@
 export class Profile {
-   firstName: string;
-   lastName: string;
-   primaryNumber: number;
-   primaryAddress: string;
-   organization: string;
+
+   constructor(
+      public firstName: string,
+      public lastName: string,
+      public primaryNumber?: string,
+      public primaryEmail?: string,
+      public primaryAddress?: string,
+      public organization?: string) {
+   }
 }

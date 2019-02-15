@@ -6,37 +6,6 @@
    </ion-toolbar>
 </ion-header>
 
-<!-- name, email, phone number, personal address, organization -->
 <ion-content>
-   <ion-card>
-      <ion-card-header>
-         <ion-card-subtitle>Get Started</ion-card-subtitle>
-         <ion-card-title>Profile</ion-card-title>
-      </ion-card-header>
-      <!-- profile info -->
-      <ion-item>
-         <!-- <ion-label position="stacked">First Name</ion-label> -->
-         <ion-input placeholder="First Name" [readonly]="true"></ion-input>
-      </ion-item>
-      <ion-item>
-         <!-- <ion-label position="stacked">First Name</ion-label> -->
-         <ion-input placeholder="Last Name"></ion-input>
-      </ion-item>
-      <ion-item>
-         <ion-label position="stacked">Email</ion-label>
-         <ion-input></ion-input>
-      </ion-item>
-      <ion-item>
-         <ion-label position="stacked">Primary Phone</ion-label>
-         <ion-input></ion-input>
-      </ion-item>
-      <ion-item>
-         <ion-label position="stacked">Home Address</ion-label>
-         <ion-input></ion-input>
-      </ion-item>
-      <ion-item>
-         <ion-label position="stacked">Organization</ion-label>
-         <ion-input></ion-input>
-      </ion-item>
-   </ion-card>
+   <app-profile-form></app-profile-form>
 </ion-content>

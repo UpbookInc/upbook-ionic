@@ -1,0 +1,32 @@
+<!-- first name, last name, phone number, email, personal address, organization -->
+<ion-card>
+   <ion-card-header>
+      <!-- <ion-card-subtitle>Get Started</ion-card-subtitle> -->
+      <ion-card-title>My Profile</ion-card-title>
+   </ion-card-header>
+   <form (ngSubmit)="onSubmit()" #profileForm="ngForm">
+      <ion-item>
+         <ion-input id="firstName" name="firstName" placeholder="First Name" [(ngModel)]="profile.firstName" type="text"
+            required #firstName="ngModel"></ion-input>
+         <ion-text [hidden]="firstName.valid || firstName.pristine" color="danger">
+            First Name is required
+         </ion-text>
+      </ion-item>
+      <ion-item>
+         <ion-input id="lastName" name="lastName" placeholder="Last Name" [(ngModel)]="profile.lastName" type="text"
+            required #lastName="ngModel"></ion-input>
+         <ion-text [hidden]="lastName.valid || lastName.pristine" color="danger">
+            Last Name is required
+         </ion-text>
+      </ion-item>
+      <ion-item>
+         <ion-input id="primaryEmail" name="primaryEmail" placeholder="Primary Email" [(ngModel)]="profile.primaryEmail"
+            type="email" required email #primaryEmail="ngModel"></ion-input>
+         <ion-text [hidden]="primaryEmail.valid || primaryEmail.pristine" color="danger">
+            Email is required
+         </ion-text>
+      </ion-item>
+      <ion-button [disabled]="!profileForm.form.valid" color="primary" type="submit">Save</ion-button>
+      <!-- TODO: consider showing button to "auto-text" all in-network members of your update -->
+   </form>
+</ion-card>

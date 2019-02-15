@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { ProfileService } from './service/profile.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   	selector: 'app-profile',
@@ -7,10 +9,11 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ProfilePage implements OnInit {
 
-  	constructor() { }
+   personalProfile = {};
+  	constructor(private profileService:ProfileService) { }
 
   	ngOnInit() {
-
+      this.personalProfile = this.profileService.getPersonalProfile();
   	}
 
 }
