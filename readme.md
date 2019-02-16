@@ -6,6 +6,7 @@
 - In an attempt to make sure the AndroidManaifest.xml file is correct, it will be tracked under platform-configs.  
 - After a fresh android platform install, may have to run the following:  
     > chmod +x platforms/android/gradlew  
+    > chmod +x /Applications/Android\ Studio.app/Contents/gradle/gradle-4.10.1/bin/gradle
 - If launching app for android sim doesn't work, try a cold boot from the AVD Device manager.  
 
 ##### Deeplink intent configs in AndroidManifest  

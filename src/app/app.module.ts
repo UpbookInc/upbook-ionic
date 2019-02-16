@@ -11,6 +11,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
 import { Deeplinks } from '@ionic-native/deeplinks/ngx';
+import { Contacts } from '@ionic-native/contacts/ngx';
 
 
 @NgModule({
@@ -21,6 +22,7 @@ import { Deeplinks } from '@ionic-native/deeplinks/ngx';
     StatusBar,
     SplashScreen,
     Deeplinks,
+    Contacts,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]
