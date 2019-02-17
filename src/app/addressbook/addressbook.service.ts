@@ -19,6 +19,7 @@ export class AddressbookService {
 
       //TODO: clean up and request real data that we need
       // how to turn off so we don't have errors when testing locally, maybe figure way to mock data when not on device??
+      // consider ['*']
       var allContacts;
       var opts = {
          //filter: "M",
@@ -26,11 +27,13 @@ export class AddressbookService {
          //hasPhoneNumber: true,
          fields: ['displayName', 'name']
       };
-      this.contacts.find(['displayName', 'name'], opts).then(
-         (contactsFound) => console.log('Contact found!', contactsFound),
+      return this.contacts.find(['displayName', 'name'], opts).then(
+         (contactsFound) => {
+            console.log('Contact found!', contactsFound)
+            return contactsFound;
+         },
          (error: any) => console.error('Error finding contacts.', error)
       );
-      return [];
    }
 
 }

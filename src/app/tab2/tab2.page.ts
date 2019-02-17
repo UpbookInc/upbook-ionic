@@ -10,6 +10,7 @@ import { Platform } from '@ionic/angular';
 export class Tab2Page {
 
    userUuid;
+   allContacts;
 
    constructor(private addressbookService: AddressbookService, private platform: Platform) {
       console.info('Tab2Page constructor');
@@ -18,11 +19,15 @@ export class Tab2Page {
       this.platform.ready().then((readySource) => {
          // Platform now ready, execute any required native code
          console.log('Platform ready from', readySource);
-         addressbookService.getAllAddressbookContacts();
+         this.getContacts();
       });
    }
 
    getContacts() {
-      this.addressbookService.getAllAddressbookContacts();
+      this.addressbookService.getAllAddressbookContacts().then(
+         (contactsFound) => {
+            this.allContacts = contactsFound;
+         }
+      );
    }
 }
