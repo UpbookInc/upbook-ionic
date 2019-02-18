@@ -1,9 +1,5 @@
 <!-- first name, last name, phone number, email, personal address, organization -->
 <ion-card>
-   <ion-card-header>
-      <!-- <ion-card-subtitle>Get Started</ion-card-subtitle> -->
-      <ion-card-title>My Profile</ion-card-title>
-   </ion-card-header>
    <form (ngSubmit)="onSubmit()" #profileForm="ngForm">
       <ion-item>
          <ion-input id="firstName" name="firstName" placeholder="First Name" [(ngModel)]="profile.firstName" type="text"
