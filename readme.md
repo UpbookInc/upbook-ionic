@@ -30,3 +30,8 @@
       android:pathPattern="/upbook/.*" />
 </intent-filter>  
 ```  
+
+#### iOS
+
+- there was a major update in FEB2019 on cordova-ios, so use `cordova platform add ios@5.0.0` to make sure to grab the latest.  
+

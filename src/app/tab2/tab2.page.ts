@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AddressbookService } from '../addressbook/addressbook.service';
 import { Platform } from '@ionic/angular';
+import { Contact } from '@ionic-native/contacts/ngx';
 
 @Component({
    selector: 'app-tab2',
@@ -9,8 +10,8 @@ import { Platform } from '@ionic/angular';
 })
 export class Tab2Page {
 
-   userUuid;
-   allContacts;
+   private userUuid: String;
+   private allContacts: Array<Contact>;
 
    constructor(private addressbookService: AddressbookService, private platform: Platform) {
       console.info('Tab2Page constructor');

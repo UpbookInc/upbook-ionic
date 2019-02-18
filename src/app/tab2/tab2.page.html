@@ -13,7 +13,7 @@
          <ion-card-subtitle>Select contacts to include in your UpBook Network</ion-card-subtitle>
       </ion-card-header>
       <ion-item *ngFor="let contact of allContacts">
-         {{contact.displayName}}
+         {{contact.name.givenName}}
       </ion-item>
 
    </ion-card>
