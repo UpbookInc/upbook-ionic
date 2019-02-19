@@ -5,6 +5,7 @@ import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 
 import { Deeplinks } from '@ionic-native/deeplinks/ngx';
+import { Storage } from '@ionic/storage';
 
 @Component({
    selector: 'app-root',
@@ -12,13 +13,16 @@ import { Deeplinks } from '@ionic-native/deeplinks/ngx';
 })
 export class AppComponent {
 
+   private readonly UB_DATABASE_KEY = 'UB';
+
    constructor(
       private platform: Platform,
       private splashScreen: SplashScreen,
       private statusBar: StatusBar,
       protected deeplinks: Deeplinks,
       protected navController: NavController,
-      private zone: NgZone
+      private zone: NgZone,
+      private storage: Storage
    ) {
       this.initializeApp();
    }
@@ -28,6 +32,8 @@ export class AppComponent {
          this.statusBar.styleDefault();
          this.splashScreen.hide();
 
+         this.isUBDatabaseCreated();
+         
          // routeWithNavController still uses the old push/pop under the hood
          this.deeplinks.route({
             '/upbook/intent': 'page1'
@@ -40,7 +46,7 @@ export class AppComponent {
                // must run inside zone to avoid warning, some async issue
                //TODO: best way to translate this to an object? 
                await this.navController.navigateForward(match.$route + "?" + match.$link.queryString);
-               
+
                console.log('Successfully navigated to route', match);
             });
 
@@ -49,5 +55,24 @@ export class AppComponent {
             console.error('Got a deeplink that didn\'t match', nomatch);
          });
       });
+   }
+
+   //TODO: probably remove this, not needed
+   isUBDatabaseCreated(): Promise<any> {
+      return this.storage.get(this.UB_DATABASE_KEY).then(result => {
+         if (result == null || result == undefined || result == '') {
+            console.log("UB DB to be created");
+            this.createUBDatabase();
+         } else {
+            console.log("DB already exists");
+         }
+      });
+   }
+
+   createUBDatabase() {
+      console.log("establishing UB database");
+      //TODO: add field for device and os type/version that it was created on
+      // may need this for import/export features
+      return this.storage.set(this.UB_DATABASE_KEY, {});
    }
 }

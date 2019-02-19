@@ -7,5 +7,15 @@
 </ion-header>
 
 <ion-content>
+   <ion-card>
+      <ion-card-content [hidden]="profileComplete === true">
+         Please complete your profile.
+      </ion-card-content>
+   </ion-card>
    <app-profile-form></app-profile-form>
+   <ion-card [hidden]="initSetup !== true && profileComplete === true">
+      <ion-card-content>
+         <ion-button color="primary" type="submit" routerLink="/tabs/tab2">Next</ion-button>
+      </ion-card-content>
+   </ion-card>
 </ion-content>

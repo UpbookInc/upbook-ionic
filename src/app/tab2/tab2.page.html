@@ -7,14 +7,20 @@
 </ion-header>
 
 <ion-content>
-   <ion-button (click)="getContacts()" color="primary" type="submit">getContacts</ion-button>
+   <ion-card>
+      <ion-button (click)="getUBContacts()" color="primary" type="submit">getContacts</ion-button>
+      <ion-button (click)="sendProfileToNetwork()" color="primary" type="submit">Send Profile to Network</ion-button>
+   </ion-card>
    <ion-card>
       <ion-card-header>
          <ion-card-subtitle>Select contacts to include in your UpBook Network</ion-card-subtitle>
       </ion-card-header>
-      <ion-item *ngFor="let contact of allContacts">
-         {{contact.name.givenName}}
-      </ion-item>
+      <ion-list>
+         <ion-item *ngFor="let contact of allContacts">
+            <ion-label>{{contact.name.givenName}} {{contact.name.familyName}}</ion-label>
+            <ion-checkbox slot="start" [(ngModel)]="contact.inNetwork" (ngModelChange)="toggleContactForNetwork(contact)"></ion-checkbox>
+         </ion-item>
+      </ion-list>
 
    </ion-card>
 </ion-content>
