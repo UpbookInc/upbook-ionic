@@ -12,23 +12,22 @@ import { ProfileService } from '../profile/service/profile.service';
 export class Tab2Page {
 
    private userUuid: String;
-   private allContacts: Array<Contact>;
+   private allContacts;
 
    constructor(private addressbookService: AddressbookService, private platform: Platform, private profileService: ProfileService) {
       //TODO: probably not necessary, but leave for now
       this.platform.ready().then((readySource) => {
          // Platform now ready, execute any required native code
          console.log('Platform ready from', readySource);
-         this.getUBContacts();
+         this.checkIsUBNetworkDatabaseCreated();
       });
    }
 
    getUBContacts() {
       this.addressbookService.getUBDatabaseOfContacts().then(
          (contactsFound) => {
-            this.allContacts = contactsFound;
+            this.allContacts = JSON.parse(contactsFound);
             console.log(this.allContacts);
-            this.checkIsAddressBookSavedToUBDatabase();
          }
       );
    }
@@ -39,17 +38,21 @@ export class Tab2Page {
    }
 
    sendProfileToNetwork() {
-      // profileService
+      this.profileService.sendProfileToNetwork();
    }
 
-   private checkIsAddressBookSavedToUBDatabase() {
-      this.addressbookService.isAddressBookSavedToUBDatabase().then(result => {
-         if (result == null || result == undefined || result == '') {
+   private checkIsUBNetworkDatabaseCreated() {
+      this.addressbookService.getUBDatabaseOfContacts().then(result => {
+         if (result == null || result == undefined) {
             console.log("UB Addressbook to be created");
-            //TODO: gather and save UB address book data
-            this.addressbookService.saveContactsToStore(this.allContacts);
+            this.addressbookService.getAllAddressbookContactsFromDevice().then(deviceContacts => {
+               this.allContacts = deviceContacts;
+               this.addressbookService.saveContactsToStore(this.allContacts);
+            });
+            
          } else {
             console.log("UB addressbook database already exists");
+            this.allContacts = JSON.parse(result);
          }
       });
    }

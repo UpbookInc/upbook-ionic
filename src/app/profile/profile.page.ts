@@ -11,7 +11,7 @@ import { Profile } from './model/profile';
 })
 export class ProfilePage implements OnInit {
 
-   initSetup: Boolean = true;
+   nextButtonNeeded: Boolean = false;
    profileComplete: Boolean = false;
    constructor(private profileService: ProfileService, private addressbookService: AddressbookService) { }
 
@@ -21,6 +21,17 @@ export class ProfilePage implements OnInit {
 
    private performNecessaryStartupTasks() {
       this.checkIsProfileSavedToUBDatabase();
+      this.isNetworkBeenEstablished();
+   }
+
+   private isNetworkBeenEstablished() {
+      this.addressbookService.getUBDatabaseOfContacts().then(result => {
+         if (result == null || result == undefined) {
+            this.nextButtonNeeded = true;
+         } else {
+            this.nextButtonNeeded = false;
+         }
+      });
    }
 
    private checkIsProfileSavedToUBDatabase() {

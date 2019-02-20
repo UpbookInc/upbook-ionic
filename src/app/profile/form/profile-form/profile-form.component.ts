@@ -9,15 +9,19 @@ import { Profile } from '../../model/profile';
 })
 export class ProfileFormComponent implements OnInit {
 
-   private profile: Profile;
+   private profile: Profile = new Profile();
    constructor(private profileService: ProfileService) { }
 
    ngOnInit() {
       console.log("getting personal profile from store");
       this.profileService.getPersonalProfile().then(profileResponse => {
-         this.profile = profileResponse;
-         console.log("personal profile from UB store")
-         console.log(this.profile);
+         if (profileResponse != null && profileResponse != undefined && profileResponse != '') {
+            this.profile = profileResponse;
+            console.log("personal profile from UB store")
+            console.log(this.profile);
+         } else {
+            console.log("profile is empty");
+         }
       });
    }
 

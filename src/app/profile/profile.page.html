@@ -13,9 +13,9 @@
       </ion-card-content>
    </ion-card>
    <app-profile-form></app-profile-form>
-   <ion-card [hidden]="initSetup !== true && profileComplete === true">
+   <ion-card [hidden]="nextButtonNeeded !== true">
       <ion-card-content>
-         <ion-button color="primary" type="submit" routerLink="/tabs/tab2">Next</ion-button>
+         <ion-button color="primary" type="submit" routerLink="/tabs/tab2" [disabled]="profileComplete !== true">Next</ion-button>
       </ion-card-content>
    </ion-card>
 </ion-content>

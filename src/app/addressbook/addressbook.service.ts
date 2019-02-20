@@ -21,27 +21,24 @@ export class AddressbookService {
       });
    }
 
-   isAddressBookSavedToUBDatabase(): Promise<any> {
-      return this.storage.get(this.UB_ADDRESS_BOOK_CONTACTS_KEY);
-   }
-
    updateUBContact(contactToUpdate: Contact) {
       this.storage.get(this.UB_ADDRESS_BOOK_CONTACTS_KEY).then(contactsForUpdate => {
-            let filteredContactToUpdateIndex = contactsForUpdate.findIndex(contact => contact.id == contactToUpdate.id);
-            if (filteredContactToUpdateIndex > -1) {
-               contactsForUpdate[filteredContactToUpdateIndex] = contactToUpdate;
-               this.saveContactsToStore(contactsForUpdate);
-            }
+         let parsedContactsForUpdate = JSON.parse(contactsForUpdate);
+         let filteredContactToUpdateIndex = parsedContactsForUpdate.findIndex(contact => contact.id == contactToUpdate.id);
+         if (filteredContactToUpdateIndex > -1) {
+            parsedContactsForUpdate[filteredContactToUpdateIndex] = contactToUpdate;
+            this.saveContactsToStore(parsedContactsForUpdate);
          }
+      }
       );
    }
 
-   getUBDatabaseOfContacts(): Promise<Contact[]> {
+   getUBDatabaseOfContacts(): Promise<string> {
       return this.storage.get(this.UB_ADDRESS_BOOK_CONTACTS_KEY);
    }
 
    //TODO: only use this on initial run to get contacts.  Or maybe to refresh with UB db for differences?
-   getAllAddressbookContacts(): Promise<Contact[]> {
+   getAllAddressbookContactsFromDevice(): Promise<Contact[]> {
       //TODO: clean up and request real data that we need
       // how to turn off so we don't have errors when testing locally, maybe figure way to mock data when not on device??
       // consider ['*']
@@ -72,7 +69,7 @@ export class AddressbookService {
    }
 
    saveContactsToStore(contactsToSave: Contact[]) {
-      this.storage.set(this.UB_ADDRESS_BOOK_CONTACTS_KEY, contactsToSave);
+      this.storage.set(this.UB_ADDRESS_BOOK_CONTACTS_KEY, JSON.stringify(contactsToSave));
    }
 
    //TODO: comment out this check for production release
