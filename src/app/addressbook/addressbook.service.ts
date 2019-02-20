@@ -22,19 +22,51 @@ export class AddressbookService {
    }
 
    updateUBContact(contactToUpdate: Contact) {
-      this.storage.get(this.UB_ADDRESS_BOOK_CONTACTS_KEY).then(contactsForUpdate => {
-         let parsedContactsForUpdate = JSON.parse(contactsForUpdate);
-         let filteredContactToUpdateIndex = parsedContactsForUpdate.findIndex(contact => contact.id == contactToUpdate.id);
+      this.getUBDatabaseOfContacts(contactsForUpdate => {
+         let filteredContactToUpdateIndex = contactsForUpdate.findIndex(contact => contact.id == contactToUpdate.id);
          if (filteredContactToUpdateIndex > -1) {
-            parsedContactsForUpdate[filteredContactToUpdateIndex] = contactToUpdate;
-            this.saveContactsToStore(parsedContactsForUpdate);
+            contactsForUpdate[filteredContactToUpdateIndex] = this.parseContactObjectInstanceOutIntoOwnObject(contactToUpdate);
+            this.saveContactsToStore(contactsForUpdate);
          }
-      }
-      );
+      }, errorResults => console.log(errorResults));
+
    }
 
-   getUBDatabaseOfContacts(): Promise<string> {
-      return this.storage.get(this.UB_ADDRESS_BOOK_CONTACTS_KEY);
+   getUBDatabaseOfContacts(success, error): Promise<string> {
+      return this.storage.get(this.UB_ADDRESS_BOOK_CONTACTS_KEY).then(success, error);
+   }
+
+   saveContactsToStore(contactsToSave: Contact[]) {
+      let parsedContactsToSave = this.parseJsonStringIntoContactsArray(JSON.stringify(contactsToSave))
+      this.storage.set(this.UB_ADDRESS_BOOK_CONTACTS_KEY, parsedContactsToSave);
+   }
+
+   private parseJsonStringIntoContactsArray(contactsJsonString: string) {
+      let parsedResults = JSON.parse(contactsJsonString);
+      let extractedContacts = parsedResults.map(contact => {
+         if (contact != null) {
+            //pull out contact object from _objectInstance before saving
+            if (contact["_objectInstance"] != null || contact["_objectInstance"] != undefined) {
+               return contact = <Contact>contact["_objectInstance"];
+            } else {
+               //otherwise contact object is already parsed
+               return contact;
+            }
+         }
+      });
+      return extractedContacts;
+   }
+
+   parseContactObjectInstanceOutIntoOwnObject(contactToParse: Contact) {
+      if (contactToParse["_objectInstance"] != null || contactToParse["_objectInstance"] != undefined) {
+         let parsedContact = contactToParse["_objectInstance"];
+         //capture all UB custom fields after parse
+         parsedContact.inNetwork = contactToParse.inNetwork;
+         return parsedContact;
+      } else {
+         return contactToParse;
+      }
+
    }
 
    //TODO: only use this on initial run to get contacts.  Or maybe to refresh with UB db for differences?
@@ -66,10 +98,6 @@ export class AddressbookService {
       } else {
          return this.returnMockContacts();
       }
-   }
-
-   saveContactsToStore(contactsToSave: Contact[]) {
-      this.storage.set(this.UB_ADDRESS_BOOK_CONTACTS_KEY, JSON.stringify(contactsToSave));
    }
 
    //TODO: comment out this check for production release

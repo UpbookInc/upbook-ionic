@@ -24,12 +24,10 @@ export class Tab2Page {
    }
 
    getUBContacts() {
-      this.addressbookService.getUBDatabaseOfContacts().then(
-         (contactsFound) => {
-            this.allContacts = JSON.parse(contactsFound);
-            console.log(this.allContacts);
-         }
-      );
+      this.addressbookService.getUBDatabaseOfContacts(contactsFound => {
+         this.allContacts = contactsFound;//this.addressbookService.parseJsonStringIntoContactsArray(contactsFound);
+         console.log(this.allContacts);
+      }, errorResults => console.log(errorResults));
    }
 
    toggleContactForNetwork(contactToToggleForNetwork: Contact) {
@@ -42,18 +40,18 @@ export class Tab2Page {
    }
 
    private checkIsUBNetworkDatabaseCreated() {
-      this.addressbookService.getUBDatabaseOfContacts().then(result => {
-         if (result == null || result == undefined) {
+      this.addressbookService.getUBDatabaseOfContacts(successResults => {
+         if (successResults == null || successResults == undefined) {
             console.log("UB Addressbook to be created");
             this.addressbookService.getAllAddressbookContactsFromDevice().then(deviceContacts => {
                this.allContacts = deviceContacts;
                this.addressbookService.saveContactsToStore(this.allContacts);
             });
-            
+
          } else {
             console.log("UB addressbook database already exists");
-            this.allContacts = JSON.parse(result);
+            this.allContacts = successResults;
          }
-      });
+      }, errorResults => console.log(errorResults));
    }
 }

@@ -25,13 +25,13 @@ export class ProfilePage implements OnInit {
    }
 
    private isNetworkBeenEstablished() {
-      this.addressbookService.getUBDatabaseOfContacts().then(result => {
+      this.addressbookService.getUBDatabaseOfContacts(result => {
          if (result == null || result == undefined) {
             this.nextButtonNeeded = true;
          } else {
             this.nextButtonNeeded = false;
          }
-      });
+      }, errorResults => console.log(errorResults));
    }
 
    private checkIsProfileSavedToUBDatabase() {

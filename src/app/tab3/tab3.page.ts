@@ -17,4 +17,11 @@ export class Tab3Page {
       this.storage.set(this.UB_ADDRESS_BOOK_CONTACTS_KEY, undefined);
       console.log("UB network deleted");
    }
+
+   printUBNetwork() {
+      console.log("UB network printed");
+      this.storage.get(this.UB_ADDRESS_BOOK_CONTACTS_KEY).then(result => {
+         console.log(result);
+      });
+   }
 }
