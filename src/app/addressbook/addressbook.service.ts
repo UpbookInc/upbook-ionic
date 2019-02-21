@@ -103,8 +103,9 @@ export class AddressbookService {
    //TODO: comment out this check for production release
    async returnMockContacts(): Promise<Contact[]> {
       //cannot use contact create API here, won't work correctly
-      let testContact = new Contact();
 
+      //mock standard user
+      let testContact = new Contact();
       let mockContact = Object.assign({}, testContact);
       mockContact.id = "1234567890";
       mockContact.rawId = null;
@@ -122,7 +123,25 @@ export class AddressbookService {
       mockContact.categories = null;
       mockContact.urls = null;
 
-      return await [mockContact];
-   }
+      //mock contact for empty name.  Tests html template.
+      let testContact2 = new Contact();
+      let mockContact2 = Object.assign({}, testContact2);
+      mockContact2.id = "1234444444";
+      mockContact2.rawId = null;
+      mockContact2.displayName = null;
+      // mockContact2.name = new ContactName(null, 'Joe', 'Desk');
+      mockContact2.nickname = null;
+      mockContact2.phoneNumbers = [new ContactField('mobile', '321-555-55555')];
+      mockContact2.emails = [new ContactField('personal', 'joedesk@upbook.com')];
+      mockContact2.addresses = null;
+      mockContact2.ims = null;
+      mockContact2.organizations = null;
+      mockContact2.birthday = null;
+      mockContact2.note = null;
+      mockContact2.photos = null;
+      mockContact2.categories = null;
+      mockContact2.urls = null;
 
+      return await [mockContact, mockContact2];
+   }
 }
