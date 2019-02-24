@@ -12,7 +12,7 @@ import { ProfileService } from '../profile/service/profile.service';
 export class Tab2Page {
 
    private userUuid: String;
-   private allContacts;
+   allContacts;
 
    constructor(private addressbookService: AddressbookService, private platform: Platform, private profileService: ProfileService) {
       //TODO: probably not necessary, but leave for now

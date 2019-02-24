@@ -74,7 +74,6 @@ export class AddressbookService {
       //TODO: clean up and request real data that we need
       // how to turn off so we don't have errors when testing locally, maybe figure way to mock data when not on device??
       // consider ['*']
-      var allContacts;
       var opts = {
          //filter: "M",
          multiple: true,

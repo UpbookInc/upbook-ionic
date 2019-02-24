@@ -9,7 +9,7 @@ import { Profile } from '../../model/profile';
 })
 export class ProfileFormComponent implements OnInit {
 
-   private profile: Profile = new Profile();
+   profile: Profile = new Profile();
    constructor(private profileService: ProfileService) { }
 
    ngOnInit() {
