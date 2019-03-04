@@ -3,6 +3,8 @@
 
 #### Android  
 
+- Must build Android at the following level to support `cordova-plugin-advanced-http` install.  `cordova-plugin-file` breaks if lower version.  May break other things, keep an eye on this.  
+    > ionic cordova platform add android@6.3.0  
 - In an attempt to make sure the AndroidManaifest.xml file is correct, it will be tracked under platform-configs.  
 - After a fresh android platform install, may have to run the following:  
     > chmod +x platforms/android/gradlew  
@@ -34,4 +36,7 @@
 #### iOS
 
 - there was a major update in FEB2019 on cordova-ios, so use `cordova platform add ios@5.0.0` to make sure to grab the latest.  
+
+// to prepare for ios build, run after you add ios platform:  
+> ionic cordova prepare ios  
 

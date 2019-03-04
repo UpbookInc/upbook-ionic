@@ -13,8 +13,6 @@ import { AppComponent } from './app.component';
 
 import { Deeplinks } from '@ionic-native/deeplinks/ngx';
 import { Contacts } from '@ionic-native/contacts/ngx';
-import { SMS } from '@ionic-native/sms/ngx';
-
 
 @NgModule({
   declarations: [AppComponent],
@@ -25,7 +23,6 @@ import { SMS } from '@ionic-native/sms/ngx';
     SplashScreen,
     Deeplinks,
     Contacts,
-    SMS,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]
