@@ -2,13 +2,16 @@
 ## Troubleshooting  
 
 #### Android  
+- Do yourself a favor and add Gradle to your $PATH.  Just use the one that comes with Android Studio that gets setup under your home directory:  
+    > ex: export PATH=$PATH:~/.gradle/wrapper/dists/gradle-4.10.1-all/455itskqi2qtf0v2sja68alqd/gradle-4.10.1/bin
 
 - Must build Android at the following level to support `cordova-plugin-advanced-http` install.  `cordova-plugin-file` breaks if lower version.  May break other things, keep an eye on this.  
-    > ionic cordova platform add android@6.3.0  
+    > ionic cordova platform add android@6.4.0  
 - In an attempt to make sure the AndroidManaifest.xml file is correct, it will be tracked under platform-configs.  
 - After a fresh android platform install, may have to run the following:  
     > chmod +x platforms/android/gradlew  
     > chmod +x /Applications/Android\ Studio.app/Contents/gradle/gradle-4.10.1/bin/gradle
+- If launching sim fails because lack of gradle, open project with Android Studio and follow prompt to set it up.
 - If launching app for android sim doesn't work, try a cold boot from the AVD Device manager.  
 
 ##### Deeplink intent configs in AndroidManifest  
