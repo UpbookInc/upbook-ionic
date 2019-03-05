@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Profile } from '../model/profile';
 import { Storage } from '@ionic/storage';
 import { HTTP } from '@ionic-native/http/ngx';
+import { DebugService } from 'src/app/debug/debug.service';
 
 @Injectable({
    providedIn: 'root'
@@ -10,12 +11,13 @@ export class ProfileService {
 
    private readonly UB_PROFILE_KEY = 'UB_PROFILE';
 
-   constructor(public storage: Storage, private http: HTTP) { }
+   constructor(public storage: Storage, private http: HTTP, private debugService: DebugService) { }
 
    getPersonalProfile(): Promise<Profile> {
       // TODO: originally this should be pulled in from Contacts list
       // - Should allow user to update "Contact Card" with changes to the form
       //return new Profile("Bruce", "Shaw", "321-123-4567", "bruce@fractalstack.com", "123 Street Rd, Westchester, PA, 15640", "Fractal Stack LLC");
+      this.debugService.add("ProfileService.getPersonalProfile: getting personal profile from storage.")
       return this.storage.get(this.UB_PROFILE_KEY);
    }
 
@@ -25,6 +27,7 @@ export class ProfileService {
    }
 
    saveProfileToUBDatabase(profileToSave: Profile) {
+      this.debugService.add("ProfileService.saveProfileToUBDatabase: saveProfileToUBDatabase.")
       this.storage.set(this.UB_PROFILE_KEY, profileToSave);
    }
 

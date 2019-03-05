@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Contacts, Contact, ContactField, ContactName, ContactFieldType } from '@ionic-native/contacts/ngx';
 import { Platform } from '@ionic/angular';
 import { Storage } from '@ionic/storage';
+import { DebugService } from '../debug/debug.service';
 
 @Injectable({
    providedIn: 'root'
@@ -11,9 +12,11 @@ export class AddressbookService {
    private readonly UB_ADDRESS_BOOK_CONTACTS_KEY = 'UB_ADDRESS_BOOK_CONTACTS';
 
    private isNative: Boolean = false; //TODO: comment out this check for production release
-   constructor(private contacts: Contacts, public storage: Storage, private platform: Platform) {
+   constructor(private contacts: Contacts, public storage: Storage, private platform: Platform, private debugService: DebugService) {
       //TODO: comment out this check for production release
+      this.debugService.add("AddressbookService.constr: constructor.");
       this.platform.ready().then(() => {
+         this.debugService.add("AddressbookService.constr: platform ready.");
          if (this.platform.is('cordova')) {
             // native API
             this.isNative = true;

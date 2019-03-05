@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Storage } from '@ionic/storage';
+import { DebugService } from '../debug/debug.service';
 
 @Component({
    selector: 'app-tab3',
@@ -9,8 +10,8 @@ import { Storage } from '@ionic/storage';
 export class Tab3Page {
 
    private readonly UB_ADDRESS_BOOK_CONTACTS_KEY = 'UB_ADDRESS_BOOK_CONTACTS';
-
-   constructor(private storage: Storage) {
+   debugStatements: String;
+   constructor(private storage: Storage, private debugService: DebugService) {
 
    }
    deleteUBNetwork() {
@@ -23,5 +24,9 @@ export class Tab3Page {
       this.storage.get(this.UB_ADDRESS_BOOK_CONTACTS_KEY).then(result => {
          console.log(result);
       });
+   }
+
+   getAllDebugStatements() {
+      this.debugStatements = this.debugService.get();
    }
 }

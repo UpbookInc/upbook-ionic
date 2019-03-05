@@ -11,12 +11,20 @@
       <ion-card-content>
          <ion-list>
             <ion-item>
-                  <ion-button (click)="deleteUBNetwork()" color="primary">Delete UB Network</ion-button>
+               <ion-button (click)="deleteUBNetwork()" color="primary">Delete UB Network</ion-button>
             </ion-item>
             <ion-item>
-                  <ion-button (click)="printUBNetwork()" color="primary">Print UB Network</ion-button>
+               <ion-button (click)="printUBNetwork()" color="primary">Print UB Network</ion-button>
+            </ion-item>
+            <ion-item>
+               <ion-button (click)="getAllDebugStatements()" color="primary">Get Debug</ion-button>
             </ion-item>
          </ion-list>
+      </ion-card-content>
+   </ion-card>
+   <ion-card>
+      <ion-card-content>
+         {{debugStatements}}
       </ion-card-content>
    </ion-card>
 </ion-content>
