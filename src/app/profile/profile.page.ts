@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ProfileService } from './service/profile.service';
-import { FormsModule } from '@angular/forms';
 import { AddressbookService } from '../addressbook/addressbook.service';
-import { Profile } from './model/profile';
 import { DebugService } from '../debug/debug.service';
 
 @Component({

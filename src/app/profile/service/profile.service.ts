@@ -54,6 +54,7 @@ export class ProfileService {
       .then(success, error);
    }
 
+   // NOTE: not used, just a GET test to Lambda incase we need it.
    getRequestTest() {
       console.log("init send profile to network");
       function success(data) {

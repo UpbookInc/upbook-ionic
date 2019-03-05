@@ -5,6 +5,12 @@
 - Do yourself a favor and add Gradle to your $PATH.  Just use the one that comes with Android Studio that gets setup under your home directory:  
     > ex: export PATH=$PATH:~/.gradle/wrapper/dists/gradle-4.10.1-all/455itskqi2qtf0v2sja68alqd/gradle-4.10.1/bin
 
+- Debugging APKs for production:  
+    - build APK like you were to submit to store
+    - In Android Studio select File -> Profile or Debug APK
+    - Select the built APK.  Then hit the Play icon and it should start in the simulator.
+    - Click on "Logcat" tab in AS to view everything that's going on.
+
 - Must build Android at the following level to support `cordova-plugin-advanced-http` install.  `cordova-plugin-file` breaks if lower version.  May break other things, keep an eye on this.  
     > ionic cordova platform add android@6.4.0  
 - In an attempt to make sure the AndroidManaifest.xml file is correct, it will be tracked under platform-configs.  

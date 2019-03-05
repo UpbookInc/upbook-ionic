@@ -78,6 +78,7 @@
         <splash height="2732" src="resources/ios/splash/Default@2x~universal~anyany.png" width="2732" />
     </platform>
     <engine name="ios" spec="^5.0.0" />
+    <engine name="android" spec="6.4.0" />
     <plugin name="ionic-plugin-deeplinks" spec="^1.0.17">
         <variable name="URL_SCHEME" value="upbook" />
         <variable name="DEEPLINK_SCHEME" value="https" />
@@ -93,5 +94,4 @@
     <plugin name="cordova-plugin-contacts" spec="^2.3.1" />
     <plugin name="cordova-sqlite-storage" spec="^3.0.0" />
     <plugin name="cordova-plugin-advanced-http" spec="^2.0.5" />
-    <engine name="android" spec="~6.4.0" />
 </widget>

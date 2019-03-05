@@ -13,8 +13,6 @@ import { Storage } from '@ionic/storage';
 })
 export class AppComponent {
 
-   private readonly UB_DATABASE_KEY = 'UB';
-
    constructor(
       private platform: Platform,
       private splashScreen: SplashScreen,
@@ -31,9 +29,7 @@ export class AppComponent {
       this.platform.ready().then(() => {
          this.statusBar.styleDefault();
          this.splashScreen.hide();
-
-         this.isUBDatabaseCreated();
-         
+        
          // routeWithNavController still uses the old push/pop under the hood
          this.deeplinks.route({
             '/upbook/intent': 'page1'
@@ -55,24 +51,5 @@ export class AppComponent {
             console.error('Got a deeplink that didn\'t match', nomatch);
          });
       });
-   }
-
-   //TODO: probably remove this, not needed
-   isUBDatabaseCreated(): Promise<any> {
-      return this.storage.get(this.UB_DATABASE_KEY).then(result => {
-         if (result == null || result == undefined || result == '') {
-            console.log("UB DB to be created");
-            this.createUBDatabase();
-         } else {
-            console.log("DB already exists");
-         }
-      });
-   }
-
-   createUBDatabase() {
-      console.log("establishing UB database");
-      //TODO: add field for device and os type/version that it was created on
-      // may need this for import/export features
-      return this.storage.set(this.UB_DATABASE_KEY, {});
    }
 }
