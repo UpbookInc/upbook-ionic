@@ -7,7 +7,7 @@ import { DebugService } from '../debug/debug.service';
 @Injectable({
    providedIn: 'root'
 })
-export class AddressbookService {
+export class NetworkStoreService {
 
    private readonly UB_ADDRESS_BOOK_CONTACTS_KEY = 'UB_ADDRESS_BOOK_CONTACTS';
 

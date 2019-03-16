@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 
-import { AddressbookService } from './addressbook.service';
+import { NetworkStoreService } from './networkStore.service';
 
-describe('AddressbookService', () => {
+describe('NetworkStoreService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: AddressbookService = TestBed.get(AddressbookService);
+    const service: NetworkStoreService = TestBed.get(NetworkStoreService);
     expect(service).toBeTruthy();
   });
 });

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ProfileService } from './service/profile.service';
-import { AddressbookService } from '../addressbook/addressbook.service';
+import { NetworkStoreService } from '../networkStore/networkStore.service';
 import { DebugService } from '../debug/debug.service';
 
 @Component({
@@ -12,7 +12,7 @@ export class ProfilePage implements OnInit {
 
    nextButtonNeeded: Boolean = false;
    profileComplete: Boolean = false;
-   constructor(private profileService: ProfileService, private addressbookService: AddressbookService, private debugService: DebugService) { }
+   constructor(private profileService: ProfileService, private networkStoreService: NetworkStoreService, private debugService: DebugService) { }
 
    ngOnInit() {
       this.debugService.add("ProfilePage.ngOnInit.");
@@ -25,7 +25,7 @@ export class ProfilePage implements OnInit {
    }
 
    private isNetworkBeenEstablished() {
-      this.addressbookService.getUBDatabaseOfContacts(result => {
+      this.networkStoreService.getUBDatabaseOfContacts(result => {
          this.debugService.add("ProfilePage.isNetworkBeenEstablished.");
          if (result == null || result == undefined) {
             this.nextButtonNeeded = true;

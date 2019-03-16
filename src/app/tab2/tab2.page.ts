@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AddressbookService } from '../addressbook/addressbook.service';
+import { NetworkStoreService } from '../networkStore/networkStore.service';
 import { Platform } from '@ionic/angular';
 import { Contact } from '@ionic-native/contacts/ngx';
 import { ProfileService } from '../profile/service/profile.service';
@@ -15,7 +15,7 @@ export class Tab2Page {
    private userUuid: String;
    allContacts;
 
-   constructor(private addressbookService: AddressbookService, private platform: Platform, private profileService: ProfileService, private debugService: DebugService) {
+   constructor(private networkStoreService: NetworkStoreService, private platform: Platform, private profileService: ProfileService, private debugService: DebugService) {
       //TODO: probably not necessary, but leave for now
       this.debugService.add("Tab2Page.constr: constructor.");
       this.platform.ready().then((readySource) => {
@@ -27,8 +27,8 @@ export class Tab2Page {
 
    getUBContacts() {
       this.debugService.add("Tab2Page.getUBContacts: getUBContacts");
-      this.addressbookService.getUBDatabaseOfContacts(contactsFound => {
-         this.allContacts = contactsFound;//this.addressbookService.parseJsonStringIntoContactsArray(contactsFound);
+      this.networkStoreService.getUBDatabaseOfContacts(contactsFound => {
+         this.allContacts = contactsFound;//this.networkStoreService.parseJsonStringIntoContactsArray(contactsFound);
          //WARNING: THIS COULD GET BIG: console.log(this.allContacts);
          this.debugService.add("Tab2Page.getUBContacts: contacts found.");
       }, errorResults => {
@@ -39,7 +39,7 @@ export class Tab2Page {
 
    toggleContactForNetwork(contactToToggleForNetwork: Contact) {
       console.log(contactToToggleForNetwork);
-      this.addressbookService.updateUBContact(contactToToggleForNetwork);
+      this.networkStoreService.updateUBContact(contactToToggleForNetwork);
    }
 
    sendProfileToNetwork() {
@@ -47,12 +47,12 @@ export class Tab2Page {
    }
 
    private checkIsUBNetworkDatabaseCreated() {
-      this.addressbookService.getUBDatabaseOfContacts(successResults => {
+      this.networkStoreService.getUBDatabaseOfContacts(successResults => {
          if (successResults == null || successResults == undefined) {
             this.debugService.add("Tab2Page.checkIsUBNetworkDatabaseCreated: UB Addressbook to be created.");
-            this.addressbookService.getAllAddressbookContactsFromDevice().then(deviceContacts => {
+            this.networkStoreService.getAllAddressbookContactsFromDevice().then(deviceContacts => {
                this.allContacts = deviceContacts;
-               this.addressbookService.saveContactsToStore(this.allContacts);
+               this.networkStoreService.saveContactsToStore(this.allContacts);
             });
 
          } else {
