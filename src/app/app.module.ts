@@ -14,10 +14,11 @@ import { AppComponent } from './app.component';
 import { Deeplinks } from '@ionic-native/deeplinks/ngx';
 import { Contacts } from '@ionic-native/contacts/ngx';
 import { HTTP } from '@ionic-native/http/ngx';
+import { ContactUpdatePage } from './contacts/contact-update/contact-update.page';
 
 @NgModule({
-  declarations: [AppComponent],
-  entryComponents: [],
+  declarations: [AppComponent, ContactUpdatePage],
+  entryComponents: [ContactUpdatePage],
   imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, FormsModule, IonicStorageModule.forRoot()],
   providers: [
     StatusBar,

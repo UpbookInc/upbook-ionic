@@ -2,6 +2,8 @@ import { Injectable, NgZone } from '@angular/core';
 import { Deeplinks } from '@ionic-native/deeplinks/ngx';
 import { NavController } from '@ionic/angular';
 import { DebugService } from '../debug/debug.service';
+import { ModalController } from '@ionic/angular';
+import { ContactUpdatePage } from '../contacts/contact-update/contact-update.page';
 
 @Injectable({
    providedIn: 'root'
@@ -9,7 +11,7 @@ import { DebugService } from '../debug/debug.service';
 export class DeeplinkService {
 
    constructor(protected deeplinks: Deeplinks, protected navController: NavController, private zone: NgZone,
-      private debugService: DebugService) { }
+      private debugService: DebugService, private modalController: ModalController) { }
 
    setupDeepLinkRouting() {
       // routeWithNavController still uses the old push/pop under the hood
@@ -27,7 +29,13 @@ export class DeeplinkService {
          this.zone.run(async () => {
             // must run inside zone to avoid warning, some async issue
             //TODO: best way to translate this to an object? 
-            await this.navController.navigateForward(match.$route + "?" + match.$link.queryString);
+            // await this.navController.navigateForward(match.$route + "?" + match.$link.queryString);
+            this.modalController.create({
+               component: ContactUpdatePage,
+               componentProps: { userUuid: 123 }
+            }).then((modal) => {
+               modal.present();
+            });
 
             this.debugService.add("DeeplinkService.setupDeepLinkRouting: Successfully navigated to route.");
          });

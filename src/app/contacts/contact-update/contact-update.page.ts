@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
+import { ModalController } from '@ionic/angular';
 
 @Component({
    selector: 'app-contact-update',
@@ -8,10 +9,10 @@ import { Router, ActivatedRoute } from '@angular/router';
 })
 export class ContactUpdatePage implements OnInit {
 
-   userUuid;
+   @Input() userUuid: string;
 
    constructor(private activatedroute: ActivatedRoute,
-      private router: Router) {
+      private router: Router, private modalController: ModalController) {
    }
 
    ngOnInit() {
@@ -27,7 +28,7 @@ export class ContactUpdatePage implements OnInit {
    }
 
    close() {
-      this.router.navigate(['/profile']);
+      this.modalController.dismiss();
    }
 
 
