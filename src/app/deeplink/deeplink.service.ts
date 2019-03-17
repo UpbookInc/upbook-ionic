@@ -2,7 +2,6 @@ import { Injectable, NgZone } from '@angular/core';
 import { Deeplinks } from '@ionic-native/deeplinks/ngx';
 import { NavController } from '@ionic/angular';
 import { DebugService } from '../debug/debug.service';
-import { Page1Page } from '../page1/page1.page';
 
 @Injectable({
    providedIn: 'root'
@@ -15,7 +14,7 @@ export class DeeplinkService {
    setupDeepLinkRouting() {
       // routeWithNavController still uses the old push/pop under the hood
       this.deeplinks.route({
-         '/upbook/intent': 'page1'
+         '/upbook/intent': 'contact-update'
       }).subscribe(match => {
          // match.$route - the route we matched, which is the matched entry from the arguments to route()
          // match.$args - the args passed in the link

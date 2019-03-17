@@ -1,12 +1,12 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
-   selector: 'app-page1',
-   templateUrl: './page1.page.html',
-   styleUrls: ['./page1.page.scss'],
+   selector: 'app-contact-update',
+   templateUrl: './contact-update.page.html',
+   styleUrls: ['./contact-update.page.scss'],
 })
-export class Page1Page implements OnInit {
+export class ContactUpdatePage implements OnInit {
 
    userUuid;
 
@@ -29,5 +29,6 @@ export class Page1Page implements OnInit {
    close() {
       this.router.navigate(['/profile']);
    }
+
 
 }
