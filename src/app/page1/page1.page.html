@@ -1,9 +1,26 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>Received Profile Update</ion-title>
-  </ion-toolbar>
+   <ion-toolbar>
+      <ion-title>Update Contact</ion-title>
+      <ion-buttons slot="secondary" (click)="close()">
+         <ion-button>
+            Close
+         </ion-button>
+      </ion-buttons>
+   </ion-toolbar>
 </ion-header>
 
-<ion-content padding>
-   Profile Update for {{userUuid}}
+<ion-content>
+   <ion-card>
+      <ion-card-header>
+         <ion-card-subtitle>Review Contact Updates</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+         {{userUuid}}
+         <ion-list>
+            <ion-item>
+               <ion-button (click)="close()" color="primary">Save Updates</ion-button>
+            </ion-item>
+         </ion-list>
+      </ion-card-content>
+   </ion-card>
 </ion-content>

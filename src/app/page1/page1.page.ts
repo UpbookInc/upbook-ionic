@@ -10,20 +10,24 @@ export class Page1Page implements OnInit {
 
    userUuid;
 
-   constructor(private _Activatedroute:ActivatedRoute,
-      private _router: Router) {
+   constructor(private activatedroute: ActivatedRoute,
+      private router: Router) {
    }
 
    ngOnInit() {
       console.log('on init page1page');
-      if (this._Activatedroute.snapshot.queryParamMap.has('userUuid') === true) {
-         this.userUuid = this._Activatedroute.snapshot.queryParamMap.get('userUuid');
+      if (this.activatedroute.snapshot.queryParamMap.has('userUuid') === true) {
+         this.userUuid = this.activatedroute.snapshot.queryParamMap.get('userUuid');
       }
       console.info('page1page: ' + this.userUuid);
    }
 
    onBack(): void {
-      this._router.navigate(['app-tab1']);
+      this.close();
+   }
+
+   close() {
+      this.router.navigate(['/profile']);
    }
 
 }
