@@ -1,7 +1,7 @@
 <ion-header>
    <ion-toolbar>
-      <ion-title>Update Contact</ion-title>
-      <ion-buttons slot="secondary" (click)="close()">
+      <ion-title>Review Contact Updates</ion-title>
+      <ion-buttons slot="secondary" (click)="cancel()">
          <ion-button>
             Close
          </ion-button>
@@ -12,23 +12,45 @@
 <ion-content>
    <ion-card>
       <ion-card-header>
-         <ion-card-subtitle>Review Contact Updates</ion-card-subtitle>
+         <ion-card-title>{{displayName}}</ion-card-title>
+         <ion-card-subtitle *ngIf="updateNeeded === false">
+            No updates to perform
+         </ion-card-subtitle>
+      </ion-card-header>
+   </ion-card>
+
+   <ion-card *ngIf="contactDeltas && contactDeltas.phoneNumbersRemoved && contactDeltas.phoneNumbersRemoved.length > 0">
+      <ion-card-header>
+         <ion-card-subtitle>
+            Removed Contact Information
+         </ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
          <ion-list>
-            <ion-item>
-               {{contactUpdates.displayName}}
-            </ion-item>
-            <ion-item>
-               {{contactUpdates.phoneNumbers[0].value}}
+            <ion-item *ngFor="let phNumRemoved of contactDeltas.phoneNumbersRemoved">
+               {{phNumRemoved.value}}
             </ion-item>
          </ion-list>
+      </ion-card-content>
+   </ion-card>
+
+   <ion-card *ngIf="contactDeltas && contactDeltas.addedPhoneNumbers && contactDeltas.addedPhoneNumbers.length > 0">
+      <ion-card-header>
+         <ion-card-subtitle>Added Contact Information</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
          <ion-list>
-            <ion-item>
-               <ion-button (click)="close()" color="primary">Cancel</ion-button>
-               <ion-button (click)="close()" color="primary">Save Updates</ion-button>
+            <ion-item *ngFor="let phNumAdded of contactDeltas.addedPhoneNumbers">
+               {{phNumAdded.value}}
             </ion-item>
          </ion-list>
+      </ion-card-content>
+   </ion-card>
+
+   <ion-card *ngIf="updateNeeded === true">
+      <ion-card-content>
+         <ion-button (click)="cancel()" color="primary">Cancel</ion-button>
+         <ion-button (click)="save()" color="primary">Save Updates</ion-button>
       </ion-card-content>
    </ion-card>
 </ion-content>

@@ -9,11 +9,18 @@ import { ModalController, NavParams } from '@ionic/angular';
 export class ContactUpdatePage implements OnInit {
 
    contactUpdates;
+   contactDeltas;
+   updateNeeded;
+   displayName;
 
    constructor(private modalController: ModalController, private navParams: NavParams) {
-      console.log(navParams);
       //TODO: null checks
-      this.contactUpdates = navParams.data.contactUpdates;
+      this.updateNeeded = navParams.data.updateNeeded;
+      this.displayName = this.contactUpdates = navParams.data._objectInstance.displayName;
+      if (this.updateNeeded === true) {
+         this.contactDeltas = navParams.data.deltas;
+         this.contactUpdates = navParams.data._objectInstance;
+      }
    }
 
    ngOnInit() {
@@ -21,11 +28,19 @@ export class ContactUpdatePage implements OnInit {
    }
 
    onBack(): void {
-      this.close();
+      this.close(false);
    }
 
-   close() {
-      this.modalController.dismiss();
+   save(): void {
+      this.close(true);
+   }
+
+   cancel(): void {
+      this.close(false);
+   }
+
+   private close(isSave) {
+      this.modalController.dismiss({ save: isSave });
    }
 
 
