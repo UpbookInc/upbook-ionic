@@ -15,9 +15,17 @@
          <ion-card-subtitle>Review Contact Updates</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
-         {{userUuid}}
          <ion-list>
             <ion-item>
+               {{contactUpdates.displayName}}
+            </ion-item>
+            <ion-item>
+               {{contactUpdates.phoneNumbers[0].value}}
+            </ion-item>
+         </ion-list>
+         <ion-list>
+            <ion-item>
+               <ion-button (click)="close()" color="primary">Cancel</ion-button>
                <ion-button (click)="close()" color="primary">Save Updates</ion-button>
             </ion-item>
          </ion-list>

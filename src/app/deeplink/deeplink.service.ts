@@ -4,17 +4,19 @@ import { NavController } from '@ionic/angular';
 import { DebugService } from '../debug/debug.service';
 import { ModalController } from '@ionic/angular';
 import { ContactUpdatePage } from '../contacts/contact-update/contact-update.page';
+import { ContactsService } from '../contacts/contacts.service';
 
 @Injectable({
    providedIn: 'root'
 })
 export class DeeplinkService {
 
+   //TODO: consider having a "manual override" option incase we can't find the contact.  Allows user to select which contact to update.
+   // - this could happen in the event of a name and phone number change at the same time.
    constructor(protected deeplinks: Deeplinks, protected navController: NavController, private zone: NgZone,
-      private debugService: DebugService, private modalController: ModalController) { }
+      private debugService: DebugService, private modalController: ModalController, private contactsService: ContactsService) { }
 
    setupDeepLinkRouting() {
-      // routeWithNavController still uses the old push/pop under the hood
       this.deeplinks.route({
          '/upbook/intent': 'contact-update'
       }).subscribe(match => {
@@ -24,25 +26,55 @@ export class DeeplinkService {
          this.debugService.add("DeeplinkService.setupDeepLinkRouting: Successfully matched route:");
          this.debugService.add(match);
 
-         //TODO: need to decode data so that it's usable
+         var contactUpdates;
+         this.getContactFromDevice().then(contactFound => {
+            if (contactFound != undefined && contactFound != null) {
+               contactUpdates = this.parseContactQueryString(match.$link.queryString);
 
-         this.zone.run(async () => {
-            // must run inside zone to avoid warning, some async issue
-            //TODO: best way to translate this to an object? 
-            // await this.navController.navigateForward(match.$route + "?" + match.$link.queryString);
-            this.modalController.create({
-               component: ContactUpdatePage,
-               componentProps: { userUuid: 123 }
-            }).then((modal) => {
-               modal.present();
-            });
-
-            this.debugService.add("DeeplinkService.setupDeepLinkRouting: Successfully navigated to route.");
+               this.modalController.create({
+                  component: ContactUpdatePage,
+                  componentProps: contactUpdates
+               }).then((modal) => {
+                  modal.present();
+                  this.debugService.add("DeeplinkService.setupDeepLinkRouting: Successfully navigated to route.");
+                  
+                  modal.onDidDismiss().then(data => {
+                     //TODO: call to save updates to contact 
+                     this.contactsService.updateContact(contactUpdates)
+                  });
+               });
+            } else {
+               //TODO: maybe this is a new contact, ask to create
+            }
          });
-
       }, nomatch => {
          // nomatch.$link - the full link data
          console.error('Got a deeplink that didn\'t match', nomatch);
       });
+   }
+
+   getContactFromDevice(): Promise<Contact> {
+      return this.contactsService.findContactByName("John Bassett").then(contactFound => {
+         this.debugService.add("DeeplinkService.getContactFromDevice: Contact found");
+         return contactFound;
+      }, (error: any) => {
+         //TODO: handle known error cases like denied permissions.
+         this.debugService.add("DeeplinkService.getContactFromDevice: Error finding contacts.");
+         this.debugService.add(error);
+         return Promise.resolve(undefined);
+      });
+   }
+
+   //TODO: build a simple object with the contact fields that we are tracking
+   //TODO: also build out deltas here
+   parseContactQueryString(queryStringWithUpdates) {
+      var searchParams = new URLSearchParams(queryStringWithUpdates);
+      console.log(searchParams);
+      return {
+         contactUpdates: {
+            displayName: "John Bassett",
+            phoneNumbers: [{ value: "111-564-7897" }]
+         }
+      }
    }
 }

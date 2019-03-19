@@ -1,6 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { ModalController } from '@ionic/angular';
+import { ModalController, NavParams } from '@ionic/angular';
 
 @Component({
    selector: 'app-contact-update',
@@ -9,18 +8,16 @@ import { ModalController } from '@ionic/angular';
 })
 export class ContactUpdatePage implements OnInit {
 
-   @Input() userUuid: string;
+   contactUpdates;
 
-   constructor(private activatedroute: ActivatedRoute,
-      private router: Router, private modalController: ModalController) {
+   constructor(private modalController: ModalController, private navParams: NavParams) {
+      console.log(navParams);
+      //TODO: null checks
+      this.contactUpdates = navParams.data.contactUpdates;
    }
 
    ngOnInit() {
       console.log('on init page1page');
-      if (this.activatedroute.snapshot.queryParamMap.has('userUuid') === true) {
-         this.userUuid = this.activatedroute.snapshot.queryParamMap.get('userUuid');
-      }
-      console.info('page1page: ' + this.userUuid);
    }
 
    onBack(): void {

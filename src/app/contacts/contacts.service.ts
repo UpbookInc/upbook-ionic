@@ -14,13 +14,15 @@ export class ContactsService {
 
       //TODO: check that contact exists
       var contactToUpdate;
-      this.findContactByName("David Second").then(contactFound => {
+      this.findContactByName(contactWithUpdates.displayName).then(contactFound => {
          this.debugService.add("ContactsService.updateContact: Contact found");
+
+         //TODO: create new contact if doesn't exist
          if (contactFound != undefined && contactFound != null && contactFound.length > 0) {
             contactToUpdate = contactFound[0];
             //contactToUpdate.phoneNumbers[0] = new ContactField('mobile', '6471234567');
             //contactToUpdate.phoneNumbers.push(new ContactField("mobile", "6471234567"))
-            contactToUpdate.phoneNumbers[0].value = "4448915645";
+            contactToUpdate.phoneNumbers[0].value = "6668915645";
             //new ContactField('mobile', '321-475-9999')
             // contactToUpdate.phoneNumbers = [{
             //    //id: "1", TODO: May have to manually remove id so it doesn't somehow get changed
@@ -57,7 +59,7 @@ export class ContactsService {
          filter: nameToSearch,
          multiple: false,
          //hasPhoneNumber: true,
-         fields: ['displayName', 'name']
+         desiredFields: ['displayName', 'name', 'phoneNumbers', 'addresses', 'emails']
       };
       return this.contacts.find(['*'], opts).then(
          (contactsFound) => {
