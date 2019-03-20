@@ -12,10 +12,18 @@
          Please complete your profile.
       </ion-card-content>
    </ion-card>
-   <app-profile-form></app-profile-form>
-   <ion-card [hidden]="nextButtonNeeded !== true">
+   <app-profile-form (saveClicked)="eventFromChild($event)"></app-profile-form>
+   <ion-card [hidden]="networkEstablished !== true">
       <ion-card-content>
-         <ion-button color="primary" type="submit" routerLink="/tabs/tab2" [disabled]="profileComplete !== true">Next</ion-button>
+         <ion-list>
+            <ion-item>
+               Create UpBook Network
+               <ion-button slot="end" color="primary" type="submit" routerLink="/tabs/tab2"
+                  [disabled]="profileComplete !== true">
+                  Next
+               </ion-button>
+            </ion-item>
+         </ion-list>
       </ion-card-content>
    </ion-card>
 </ion-content>

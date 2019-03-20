@@ -12,6 +12,7 @@ import { ContactsService } from '../contacts/contacts.service';
 export class Tab3Page {
 
    private readonly UB_ADDRESS_BOOK_CONTACTS_KEY = 'UB_ADDRESS_BOOK_CONTACTS';
+   private readonly UB_PROFILE_KEY = 'UB_PROFILE';
    debugStatements: String;
    constructor(private storage: Storage, private debugService: DebugService, private contactService: ContactsService) {
 
@@ -25,6 +26,11 @@ export class Tab3Page {
    deleteUBNetwork() {
       this.storage.set(this.UB_ADDRESS_BOOK_CONTACTS_KEY, undefined);
       console.log("UB network deleted");
+   }
+
+   deleteUBNProfile() {
+      this.storage.set(this.UB_PROFILE_KEY, undefined);
+      console.log("UB profile deleted");
    }
 
    printUBNetwork() {

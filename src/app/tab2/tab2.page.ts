@@ -15,25 +15,14 @@ export class Tab2Page {
    private userUuid: String;
    allContacts;
 
-   constructor(private networkStoreService: NetworkStoreService, private platform: Platform, private profileService: ProfileService, private debugService: DebugService) {
-      //TODO: probably not necessary, but leave for now
-      this.debugService.add("Tab2Page.constr: constructor.");
-      this.platform.ready().then((readySource) => {
-         // Platform now ready, execute any required native code
-         this.debugService.add("Tab2Page.constr: platform ready from: " + readySource);
-         this.checkIsUBNetworkDatabaseCreated();
-      });
+   constructor(private networkStoreService: NetworkStoreService, private platform: Platform,
+      private profileService: ProfileService, private debugService: DebugService) {
    }
 
-   getUBContacts() {
-      this.debugService.add("Tab2Page.getUBContacts: getUBContacts");
-      this.networkStoreService.getUBDatabaseOfContacts(contactsFound => {
-         this.allContacts = contactsFound;//this.networkStoreService.parseJsonStringIntoContactsArray(contactsFound);
-         //WARNING: THIS COULD GET BIG: console.log(this.allContacts);
-         this.debugService.add("Tab2Page.getUBContacts: contacts found.");
-      }, errorResults => {
-         this.debugService.add("Tab2Page: errorResults");
-         this.debugService.add(errorResults);
+   ionViewDidEnter() {
+      this.platform.ready().then((readySource) => {
+         this.debugService.add("Tab2Page.ionViewDidEnter: platform ready");
+         this.checkIsUBNetworkDatabaseCreated();
       });
    }
 
