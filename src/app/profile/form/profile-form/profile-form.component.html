@@ -30,6 +30,13 @@
                Phone is required
             </ion-text>
          </ion-item>
+         <ion-item>
+               <ion-input id="address" name="address" placeholder="Address" [(ngModel)]="profile.address"
+                  type="string" required #address="ngModel"></ion-input>
+               <ion-text [hidden]="address.valid || address.pristine" color="danger">
+                  Address is required
+               </ion-text>
+            </ion-item>
          <ion-button [disabled]="!profileForm.form.valid" color="primary" type="submit">Save</ion-button>
          <!-- TODO: consider showing button to "auto-text" all in-network members of your update -->
       </form>

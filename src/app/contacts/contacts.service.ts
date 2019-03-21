@@ -21,50 +21,76 @@ export class ContactsService {
 
       return this.findContactByName(contactWithUpdates.displayName).then(contactFound => {
          this.debugService.add("ContactsService.buildContactWithUpdates: Contact found");
-         var contactToUpdate = contactFound[0];
-         contactToUpdate.deltas = {};
 
-         //DEBUG ONLY REMOVE - change contact updates here for testing
-         //contactWithUpdates.phoneNumbers.push(new ContactField('', "2222222222", false));
-         //contactWithUpdates.phoneNumbers = [];
-         //contactWithUpdates.phoneNumbers.push(new ContactField('', "2222222222", false));
+         if (contactFound[0]) {
+            var contactToUpdate = contactFound[0];
+            contactToUpdate.deltas = {};
 
-         //TODO: phone numbers must be normalized before comparing.  Seems like they can be stored in whatever format.
-         const getPhoneNumbersNotInSecondArray =
-            (firstArrayPhoneNumbers, secondArrayPhoneNumbers) =>
-               firstArrayPhoneNumbers.filter(firstArrayNum =>
-                  secondArrayPhoneNumbers.map(secondArrayNum => secondArrayNum.value).indexOf(firstArrayNum.value) === -1);
+            //DEBUG ONLY REMOVE - change contact updates here for testing
+            //contactWithUpdates.phoneNumbers.push(new ContactField('', "2222222222", false));
+            //contactWithUpdates.phoneNumbers = [];
+            //contactWithUpdates.phoneNumbers.push(new ContactField('', "2222222222", false));
 
-         if (contactWithUpdates.phoneNumbers && contactWithUpdates.phoneNumbers.length > 0) {
-            var addedPhoneNumbers = contactWithUpdates.phoneNumbers;
-            if (contactToUpdate.phoneNumbers && contactToUpdate.phoneNumbers.length > 0) {
-               addedPhoneNumbers = getPhoneNumbersNotInSecondArray(contactWithUpdates.phoneNumbers, contactToUpdate.phoneNumbers);
+            const getPhoneNumbersNotInSecondArray =
+               (firstArrayPhoneNumbers, secondArrayPhoneNumbers) =>
+                  firstArrayPhoneNumbers.filter(firstArrayNum =>
+                     secondArrayPhoneNumbers.map(secondArrayNum => secondArrayNum.value).indexOf(firstArrayNum.value) === -1);
+
+            if (contactWithUpdates.phoneNumbers && contactWithUpdates.phoneNumbers.length > 0) {
+               var addedPhoneNumbers = contactWithUpdates.phoneNumbers;
+               if (contactToUpdate.phoneNumbers && contactToUpdate.phoneNumbers.length > 0) {
+                  addedPhoneNumbers = getPhoneNumbersNotInSecondArray(this.normalizePhoneNumber(contactWithUpdates.phoneNumbers),
+                     this.normalizePhoneNumber(contactToUpdate.phoneNumbers));
+               }
+               contactToUpdate.deltas.addedPhoneNumbers = addedPhoneNumbers;
             }
-            contactToUpdate.deltas.addedPhoneNumbers = addedPhoneNumbers;
-         }
-         if (contactToUpdate.phoneNumbers && contactToUpdate.phoneNumbers.length > 0) {
-            var phoneNumbersRemoved = getPhoneNumbersNotInSecondArray(contactToUpdate.phoneNumbers, contactWithUpdates.phoneNumbers);
-            console.log(phoneNumbersRemoved);
-            contactToUpdate.deltas.phoneNumbersRemoved = phoneNumbersRemoved;
-         }
+            if (contactToUpdate.phoneNumbers && contactToUpdate.phoneNumbers.length > 0) {
+               var phoneNumbersRemoved = getPhoneNumbersNotInSecondArray(this.normalizePhoneNumber(contactToUpdate.phoneNumbers),
+                  this.normalizePhoneNumber(contactWithUpdates.phoneNumbers));
+               console.log(phoneNumbersRemoved);
+               contactToUpdate.deltas.phoneNumbersRemoved = phoneNumbersRemoved;
+            }
 
-         contactToUpdate.phoneNumbers = contactWithUpdates.phoneNumbers;
+            contactToUpdate.phoneNumbers = contactWithUpdates.phoneNumbers;
 
-         //determine if an update is needed
-         if ((contactToUpdate.deltas.addedPhoneNumbers && contactToUpdate.deltas.addedPhoneNumbers.length > 0)
-            || (contactToUpdate.deltas.phoneNumbersRemoved && contactToUpdate.deltas.phoneNumbersRemoved.length > 0)) {
-            contactToUpdate.updateNeeded = true;
+            //determine if an update is needed
+            if ((contactToUpdate.deltas.addedPhoneNumbers && contactToUpdate.deltas.addedPhoneNumbers.length > 0)
+               || (contactToUpdate.deltas.phoneNumbersRemoved && contactToUpdate.deltas.phoneNumbersRemoved.length > 0)) {
+               contactToUpdate.updateNeeded = true;
+            } else {
+               contactToUpdate.updateNeeded = false;
+            }
+
+            return contactToUpdate;
+
          } else {
-            contactToUpdate.updateNeeded = false;
-         }
+            //TODO: contact not found on device, create new one? 
+            //For now just mimic contact object and set to update not needed
+            return {
+               updateNeeded: false,
+               _objectInstance: {
+                  displayName: contactWithUpdates.displayName
+               }
 
-         return contactToUpdate;
+            };
+         }
 
       }, (error: any) => {
          //TODO: handle known error cases like denied permissions.
          this.debugService.add("ContactsService.buildContactWithUpdates: Error finding contacts.");
          this.debugService.add(error);
          return Promise.resolve(undefined);
+      });
+   }
+
+   normalizePhoneNumber(numbersToNormalize: Array<any>) {
+      return numbersToNormalize.map(nubStr => {
+         nubStr.value = nubStr.value.replace(/\D/g, '');
+         if (nubStr.value.length === 11) {
+            //remove country code 
+            nubStr.value = nubStr.value.substring(1);
+         }
+         return nubStr;
       });
    }
 
@@ -90,6 +116,8 @@ export class ContactsService {
             contactToUpdate.rawId = contactToUpdate.id;
             contactToUpdate._objectInstance.rawId = contactToUpdate.id;
 
+            //TODO: perform checks before updating. Only update if needed.
+            //TODO: pull this save out into its own method so we can chain these save requests together 
             contactToUpdate.phoneNumbers = [];
             //Initial save to clear out phone numbers
             this.executeSave(contactToUpdate, (contactsFound) => {
@@ -98,6 +126,7 @@ export class ContactsService {
 
                //apply phone number changes
                contactToUpdate.phoneNumbers = this.updateContactPhoneNumbers(contactWithUpdates);
+
 
                this.executeSave(contactToUpdate, (contactsFound) => {
                   this.debugService.add("ContactsService.updateContact: Contact updates saved.");

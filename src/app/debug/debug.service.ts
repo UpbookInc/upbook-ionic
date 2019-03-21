@@ -10,6 +10,7 @@ export class DebugService {
 
    }
 
+   //TODO: add production flag eventually
    add(messageToAdd) {
       if (this.allDebugOutput != "") {
          this.allDebugOutput += "::::"

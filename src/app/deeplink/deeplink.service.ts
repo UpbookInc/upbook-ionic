@@ -7,6 +7,10 @@ import { ContactUpdatePage } from '../contacts/contact-update/contact-update.pag
 import { ContactsService } from '../contacts/contacts.service';
 import { Contact } from '@ionic-native/contacts/ngx';
 
+// TODO: 
+// - LOW Priority: consider having a "manual override" option incase we can't find the contact.  Allows user to select which contact to update.
+//    This could happen in the event of a name and phone number change at the same time.
+
 // DEBUG:
 // generate base64 hash of contact object with updates:
 // > btoa(JSON.stringify({"displayName":"John Bassett","phoneNumbers":[{"value":"5551110000"}]}));
@@ -19,8 +23,6 @@ import { Contact } from '@ionic-native/contacts/ngx';
 })
 export class DeeplinkService {
 
-   //TODO: consider having a "manual override" option incase we can't find the contact.  Allows user to select which contact to update.
-   // - this could happen in the event of a name and phone number change at the same time.
    constructor(protected deeplinks: Deeplinks, protected navController: NavController, private zone: NgZone,
       private debugService: DebugService, private modalController: ModalController, private contactsService: ContactsService) { }
 
