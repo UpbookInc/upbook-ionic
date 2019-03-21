@@ -14,6 +14,8 @@ export class Tab2Page {
 
    private userUuid: String;
    allContacts;
+   isNetworkSelectionDisabled: boolean = false;
+   MAX_IN_NETWORK_CONTACTS_SELECTED = 2;
 
    constructor(private networkStoreService: NetworkStoreService, private platform: Platform,
       private profileService: ProfileService, private debugService: DebugService) {
@@ -27,12 +29,17 @@ export class Tab2Page {
    }
 
    toggleContactForNetwork(contactToToggleForNetwork: Contact) {
-      console.log(contactToToggleForNetwork);
+      this.checkForMaximumSelectedNetworkContacts(contactToToggleForNetwork.inNetwork);
       this.networkStoreService.updateUBContact(contactToToggleForNetwork);
    }
 
-   sendProfileToNetwork() {
-      this.profileService.sendProfileToNetwork();
+   checkForMaximumSelectedNetworkContacts(isContactSelected) {
+      if (isContactSelected === true &&
+         this.allContacts.filter(contact => contact.inNetwork).length === this.MAX_IN_NETWORK_CONTACTS_SELECTED) {
+         this.isNetworkSelectionDisabled = true;
+      } else {
+         this.isNetworkSelectionDisabled = false;
+      }
    }
 
    private checkIsUBNetworkDatabaseCreated() {
@@ -47,7 +54,12 @@ export class Tab2Page {
          } else {
             this.debugService.add("Tab2Page.checkIsUBNetworkDatabaseCreated: UB addressbook database already exists.");
             this.allContacts = successResults;
+            this.checkForMaximumSelectedNetworkContacts(true);
          }
       }, errorResults => console.log(errorResults));
+   }
+
+   sendProfileToNetwork() {
+      this.profileService.sendProfileToNetwork();
    }
 }

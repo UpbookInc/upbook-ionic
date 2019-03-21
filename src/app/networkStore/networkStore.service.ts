@@ -12,6 +12,7 @@ export class NetworkStoreService {
    private readonly UB_ADDRESS_BOOK_CONTACTS_KEY = 'UB_ADDRESS_BOOK_CONTACTS';
 
    private isNative: Boolean = false; //TODO: comment out this check for production release
+   
    constructor(private contacts: Contacts, public storage: Storage, private platform: Platform, private debugService: DebugService) {
       //TODO: comment out this check for production release
       this.debugService.add("AddressbookService.constr: constructor.");
@@ -21,6 +22,16 @@ export class NetworkStoreService {
             // native API
             this.isNative = true;
          }
+      });
+   }
+
+   getUBSelectedNetworkContacts(): Promise<any>{
+      return this.getUBDatabaseOfContacts(ubContacts => {
+         let inNetworkContacts = ubContacts.filter(contact => contact.inNetwork === true);
+         return inNetworkContacts;
+      }, errorResults => { 
+         console.log(errorResults);
+         return Promise.resolve(undefined);
       });
    }
 

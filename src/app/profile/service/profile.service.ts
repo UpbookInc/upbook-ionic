@@ -4,6 +4,7 @@ import { Storage } from '@ionic/storage';
 import { HTTP } from '@ionic-native/http/ngx';
 import { DebugService } from 'src/app/debug/debug.service';
 import { Contact } from '@ionic-native/contacts/ngx';
+import { NetworkStoreService } from 'src/app/networkStore/networkStore.service';
 
 // TODO:
 // - it would be a nice improvement if this could be pulled from device's contact, just to set the profile for the first time.
@@ -17,7 +18,7 @@ export class ProfileService {
 
    private readonly UB_PROFILE_KEY = 'UB_PROFILE';
 
-   constructor(public storage: Storage, private http: HTTP, private debugService: DebugService) { }
+   constructor(public storage: Storage, private http: HTTP, private debugService: DebugService, private networkStoreService: NetworkStoreService) { }
 
    getPersonalProfile(): Promise<Profile> {
       this.debugService.add("ProfileService.getPersonalProfile: getting personal profile from storage.")
@@ -29,7 +30,8 @@ export class ProfileService {
    }
 
    saveProfileToUBDatabase(profileToSave: Profile) {
-      this.debugService.add("ProfileService.saveProfileToUBDatabase: saveProfileToUBDatabase.")
+      this.debugService.add("ProfileService.saveProfileToUBDatabase: saveProfileToUBDatabase.");
+      profileToSave.displayName = profileToSave.firstName + ' ' + profileToSave.lastName
       this.storage.set(this.UB_PROFILE_KEY, profileToSave);
    }
 
@@ -48,7 +50,6 @@ export class ProfileService {
          console.log(errorData.headers);
       }
 
-      //TODO: save display name
       var upbookSendMessageApi = 'https://gq3zsrsx63.execute-api.us-east-1.amazonaws.com/default/UpbookSMSApi-1';
       this.http.setDataSerializer('json');
       this.getPersonalProfile().then(profileResponse => {
@@ -56,18 +57,46 @@ export class ProfileService {
          var convertedProfileToContactFormat = this.convertPersonalProfileToContact(profileResponse);
          console.log(convertedProfileToContactFormat);
 
-         //TODO: need to bake in a '1' infront of all numbers
          var profileToSend: any = {}
-         profileToSend.profile = convertedProfileToContactFormat;
-         profileToSend.networkNumbers = ['19417163554', '14074317596'];
-         // profileToSend.p = convertedProfileToContactFormat;
-         // profileToSend.n = ['19417163554', '14074317596'];
-         console.log(profileToSend);
 
-         // this.http.post(upbookSendMessageApi,
-         //    profileToSend,
-         //    {})
-         //    .then(success, error);
+         this.networkStoreService.getAllAddressbookContactsFromDevice().then(deviceContacts => {
+            this.networkStoreService.getUBSelectedNetworkContacts().then(inNetworkContacts => {
+
+               // get selected network contacts' phoneNumbers from device's contact list 
+               var contactsFromDeviceInNetwork = inNetworkContacts.map(inNetworkContact => {
+                  return deviceContacts.find(deviceContact => {
+                     return deviceContact.displayName === inNetworkContact.displayName;
+                  });
+               });
+               //console.log(contactsFromDeviceInNetwork);
+
+               //TODO: eventually may need to select main or preferred number
+               var inNetworkContactNumbers = contactsFromDeviceInNetwork.map(contactFromDeviceinNetwork => {
+                  return contactFromDeviceinNetwork.phoneNumbers[0].value;
+               });
+               //console.log(inNetworkContactNumbers);
+
+               // bake in the '1' prefix if needed
+               inNetworkContactNumbers = inNetworkContactNumbers.map(inNetworkContact => {
+                  if (inNetworkContact.length == 10) {
+                     inNetworkContact = '1' + inNetworkContact;
+                  }
+                  return inNetworkContact;
+               });
+
+               console.log(inNetworkContactNumbers);
+
+               profileToSend.profile = convertedProfileToContactFormat;
+               profileToSend.networkNumbers = inNetworkContactNumbers;
+               // profileToSend.networkNumbers = ['19417163554', '14074317596'];
+               console.log(profileToSend);
+
+               this.http.post(upbookSendMessageApi,
+                  profileToSend,
+                  {})
+                  .then(success, error);
+            });
+         });
       });
    }
 
@@ -75,7 +104,7 @@ export class ProfileService {
    private convertPersonalProfileToContact(personalProfile): any {
       var profileContact = {
          phoneNumbers: [{ value: personalProfile.primaryNumber }],
-         displayName: personalProfile.firstName + ' ' + personalProfile.lastName,
+         displayName: personalProfile.displayName,
          emails: [{ value: personalProfile.primaryEmail }],
          address: personalProfile.address,
          name: {

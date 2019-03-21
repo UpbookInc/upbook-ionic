@@ -13,7 +13,7 @@ import { Contact } from '@ionic-native/contacts/ngx';
 
 // DEBUG:
 // generate base64 hash of contact object with updates:
-// > btoa(JSON.stringify({"displayName":"John Bassett","phoneNumbers":[{"value":"5551110000"}]}));
+// > btoa(JSON.stringify({"displayName":"John Bassett","phoneNumbers":[{"value":"9417163554"}], "addresses":[{"value":"2481 appalachian dr, melbourne Fl, 32939"}]}));
 // clear out phone numbers for "John Bassett" contact: 
 // > adb shell am start -a android.intent.action.VIEW -d "https://fractalstack.com/upbook/intent?updates=eyJkaXNwbGF5TmFtZSI6IkpvaG4gQmFzc2V0dCIsInBob25lTnVtYmVycyI6W119"
 // Send command to mimic link click: 

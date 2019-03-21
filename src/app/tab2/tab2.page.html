@@ -8,16 +8,21 @@
 
 <ion-content>
    <ion-card>
-      <ion-button expand="block" (click)="sendProfileToNetwork()" color="primary" type="submit">Send Profile to Network</ion-button>
+      <ion-button expand="block" (click)="sendProfileToNetwork()" color="primary" type="submit">Send Profile to Network
+      </ion-button>
    </ion-card>
    <ion-card>
       <ion-card-header>
          <ion-card-subtitle>Select contacts to include in your UpBook Network</ion-card-subtitle>
+         <ion-card-subtitle [hidden]="isNetworkSelectionDisabled !== true" color="danger">Maximum of
+            {{MAX_IN_NETWORK_CONTACTS_SELECTED}} in-network contacts allowed</ion-card-subtitle>
       </ion-card-header>
       <ion-list>
          <ion-item *ngFor="let contact of allContacts">
             <ion-label>{{contact.name?.givenName || "[missing name]"}} {{contact.name?.familyName}}</ion-label>
-            <ion-checkbox slot="start" [(ngModel)]="contact.inNetwork" (ngModelChange)="toggleContactForNetwork(contact)"></ion-checkbox>
+            <ion-checkbox slot="start" [(ngModel)]="contact.inNetwork"
+               [disabled]="isNetworkSelectionDisabled === true && contact.inNetwork !== true"
+               (ngModelChange)="toggleContactForNetwork(contact)"></ion-checkbox>
          </ion-item>
       </ion-list>
 
