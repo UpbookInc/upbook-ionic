@@ -5,6 +5,7 @@ import { HTTP } from '@ionic-native/http/ngx';
 import { DebugService } from 'src/app/debug/debug.service';
 import { Contact } from '@ionic-native/contacts/ngx';
 import { NetworkStoreService } from 'src/app/networkStore/networkStore.service';
+import { ContactsService } from 'src/app/contacts/contacts.service';
 
 // TODO:
 // - it would be a nice improvement if this could be pulled from device's contact, just to set the profile for the first time.
@@ -18,7 +19,8 @@ export class ProfileService {
 
    private readonly UB_PROFILE_KEY = 'UB_PROFILE';
 
-   constructor(public storage: Storage, private http: HTTP, private debugService: DebugService, private networkStoreService: NetworkStoreService) { }
+   constructor(public storage: Storage, private http: HTTP, private debugService: DebugService, private networkStoreService: NetworkStoreService,
+      private contactService: ContactsService) { }
 
    getPersonalProfile(): Promise<Profile> {
       this.debugService.add("ProfileService.getPersonalProfile: getting personal profile from storage.")
@@ -65,7 +67,8 @@ export class ProfileService {
                // get selected network contacts' phoneNumbers from device's contact list 
                var contactsFromDeviceInNetwork = inNetworkContacts.map(inNetworkContact => {
                   return deviceContacts.find(deviceContact => {
-                     return deviceContact.displayName === inNetworkContact.displayName;
+                     return deviceContact.name.givenName === inNetworkContact.name.givenName &&
+                        deviceContact.name.familyName === inNetworkContact.name.familyName;
                   });
                });
                //console.log(contactsFromDeviceInNetwork);
@@ -76,18 +79,19 @@ export class ProfileService {
                });
                //console.log(inNetworkContactNumbers);
 
+               var normalizedInNetworkNumbersFromDevice = this.contactService.normalizePhoneNumberAsStringArray(inNetworkContactNumbers);
+
                // bake in the '1' prefix if needed
-               inNetworkContactNumbers = inNetworkContactNumbers.map(inNetworkContact => {
+               normalizedInNetworkNumbersFromDevice = normalizedInNetworkNumbersFromDevice.map(inNetworkContact => {
                   if (inNetworkContact.length == 10) {
                      inNetworkContact = '1' + inNetworkContact;
                   }
                   return inNetworkContact;
                });
-
-               console.log(inNetworkContactNumbers);
+               console.log(normalizedInNetworkNumbersFromDevice);
 
                profileToSend.profile = convertedProfileToContactFormat;
-               profileToSend.networkNumbers = inNetworkContactNumbers;
+               profileToSend.networkNumbers = normalizedInNetworkNumbersFromDevice;
                // profileToSend.networkNumbers = ['19417163554', '14074317596'];
                console.log(profileToSend);
 

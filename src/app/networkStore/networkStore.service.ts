@@ -99,7 +99,7 @@ export class NetworkStoreService {
       if (this.isNative === true) {
          return this.contacts.find(['*'], opts).then(
             (contactsFound) => {
-               console.log('Contact found!', contactsFound)
+               //console.log('Contact found!', contactsFound)
                return contactsFound;
             },
             (error: any) => {

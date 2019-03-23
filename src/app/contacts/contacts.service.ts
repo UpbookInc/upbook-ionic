@@ -39,14 +39,14 @@ export class ContactsService {
             if (contactWithUpdates.phoneNumbers && contactWithUpdates.phoneNumbers.length > 0) {
                var addedPhoneNumbers = contactWithUpdates.phoneNumbers;
                if (contactToUpdate.phoneNumbers && contactToUpdate.phoneNumbers.length > 0) {
-                  addedPhoneNumbers = getPhoneNumbersNotInSecondArray(this.normalizePhoneNumber(contactWithUpdates.phoneNumbers),
-                     this.normalizePhoneNumber(contactToUpdate.phoneNumbers));
+                  addedPhoneNumbers = getPhoneNumbersNotInSecondArray(this.normalizePhoneNumberAsContactField(contactWithUpdates.phoneNumbers),
+                     this.normalizePhoneNumberAsContactField(contactToUpdate.phoneNumbers));
                }
                contactToUpdate.deltas.addedPhoneNumbers = addedPhoneNumbers;
             }
             if (contactToUpdate.phoneNumbers && contactToUpdate.phoneNumbers.length > 0) {
-               var phoneNumbersRemoved = getPhoneNumbersNotInSecondArray(this.normalizePhoneNumber(contactToUpdate.phoneNumbers),
-                  this.normalizePhoneNumber(contactWithUpdates.phoneNumbers));
+               var phoneNumbersRemoved = getPhoneNumbersNotInSecondArray(this.normalizePhoneNumberAsContactField(contactToUpdate.phoneNumbers),
+                  this.normalizePhoneNumberAsContactField(contactWithUpdates.phoneNumbers));
                console.log(phoneNumbersRemoved);
                contactToUpdate.deltas.phoneNumbersRemoved = phoneNumbersRemoved;
             }
@@ -83,12 +83,23 @@ export class ContactsService {
       });
    }
 
-   normalizePhoneNumber(numbersToNormalize: Array<any>) {
+   normalizePhoneNumberAsContactField(numbersToNormalize: Array<any>) {
       return numbersToNormalize.map(nubStr => {
          nubStr.value = nubStr.value.replace(/\D/g, '');
          if (nubStr.value.length === 11) {
             //remove country code 
             nubStr.value = nubStr.value.substring(1);
+         }
+         return nubStr;
+      });
+   }
+
+   normalizePhoneNumberAsStringArray(numbersToNormalize: Array<string>) {
+      return numbersToNormalize.map(nubStr => {
+         nubStr = nubStr.replace(/\D/g, '');
+         if (nubStr.length === 11) {
+            //remove country code 
+            nubStr = nubStr.substring(1);
          }
          return nubStr;
       });
@@ -162,7 +173,7 @@ export class ContactsService {
       return this.contacts.find(['*'], opts).then(
          (contactsFound) => {
             this.debugService.add("ContactsService.findContactByName: Contact found");
-            this.debugService.add(contactsFound);
+            //this.debugService.add(contactsFound);
             return contactsFound;
          },
          (error: any) => {

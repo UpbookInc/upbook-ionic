@@ -12,7 +12,7 @@
          Please complete your profile.
       </ion-card-content>
    </ion-card>
-   <app-profile-form (saveClicked)="eventFromChild($event)"></app-profile-form>
+   <app-profile-form (saveClicked)="eventFromChild()"></app-profile-form>
    <ion-card [hidden]="networkEstablished !== true">
       <ion-card-content>
          <ion-list>
