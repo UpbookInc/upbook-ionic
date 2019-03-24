@@ -123,9 +123,8 @@ export class ContactsService {
          //TODO: create new contact if doesn't exist
          if (contactFound != undefined && contactFound != null && contactFound.length > 0) {
 
-            contactToUpdate = contactFound[0]; 1
-            contactToUpdate.rawId = contactToUpdate.id;
-            contactToUpdate._objectInstance.rawId = contactToUpdate.id;
+            contactToUpdate = contactFound[0];
+            contactToUpdate._objectInstance.rawId = contactToUpdate.rawId;
 
             //TODO: perform checks before updating. Only update if needed.
             //TODO: pull this save out into its own method so we can chain these save requests together 
