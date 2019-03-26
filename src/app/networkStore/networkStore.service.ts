@@ -35,15 +35,16 @@ export class NetworkStoreService {
       });
    }
 
-   updateUBContact(contactToUpdate: Contact) {
+   updateMultipleUBContacts(contactsToUpdate: Array<Contact>) {
       this.getUBDatabaseOfContacts(contactsForUpdate => {
-         let filteredContactToUpdateIndex = contactsForUpdate.findIndex(contact => contact.id == contactToUpdate.id);
-         if (filteredContactToUpdateIndex > -1) {
-            contactsForUpdate[filteredContactToUpdateIndex] = this.parseContactObjectInstanceOutIntoOwnObject(contactToUpdate);
-            this.saveContactsToStore(contactsForUpdate);
-         }
+         contactsToUpdate.map(contactToUpdate => {
+            let filteredContactToUpdateIndex = contactsForUpdate.findIndex(contact => contact.id == contactToUpdate.id);
+            if (filteredContactToUpdateIndex > -1) {
+               contactsForUpdate[filteredContactToUpdateIndex] = this.parseContactObjectInstanceOutIntoOwnObject(contactToUpdate);
+            }
+         });
+         this.saveContactsToStore(contactsForUpdate);
       }, errorResults => console.log(errorResults));
-
    }
 
    getUBDatabaseOfContacts(success, error): Promise<string> {

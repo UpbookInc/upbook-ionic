@@ -14,14 +14,8 @@ export class Tab3Page {
    private readonly UB_ADDRESS_BOOK_CONTACTS_KEY = 'UB_ADDRESS_BOOK_CONTACTS';
    private readonly UB_PROFILE_KEY = 'UB_PROFILE';
    debugStatements: String;
-   constructor(private storage: Storage, private debugService: DebugService, private contactService: ContactsService) {
 
-   }
-
-   updateContact() {
-      var testContact = new Contact();
-      this.contactService.updateContact(testContact);
-   }
+   constructor(private storage: Storage, private debugService: DebugService, private contactService: ContactsService) { }
 
    deleteUBNetwork() {
       this.storage.set(this.UB_ADDRESS_BOOK_CONTACTS_KEY, undefined);

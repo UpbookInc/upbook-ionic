@@ -37,19 +37,21 @@ export class ProfileService {
       this.storage.set(this.UB_PROFILE_KEY, profileToSave);
    }
 
-   sendProfileToNetwork() {
+   sendProfileToNetwork(onSuccess, onFail) {
       console.log("init send profile to network");
       function success(data) {
          console.log("http success");
          console.log(data.status);
-         console.log(data.data); // data received by server
-         console.log(data.headers);
+         // console.log(data.data); // data received by server
+         // console.log(data.headers);
+         onSuccess();
       }
       function error(errorData) {
          console.log("http error");
          console.log(errorData.status);
          console.log(errorData.error); // error message as string
-         console.log(errorData.headers);
+         // console.log(errorData.headers);
+         onFail();
       }
 
       var upbookSendMessageApi = 'https://gq3zsrsx63.execute-api.us-east-1.amazonaws.com/default/UpbookSMSApi-1';

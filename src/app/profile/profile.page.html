@@ -9,7 +9,7 @@
 <ion-content>
    <ion-card>
       <ion-card-content [hidden]="profileComplete === true">
-         Please complete your profile.
+         <ion-text color="primary">Please complete your profile.</ion-text>
       </ion-card-content>
    </ion-card>
    <app-profile-form (saveClicked)="eventFromChild()"></app-profile-form>
@@ -18,7 +18,7 @@
          <ion-list>
             <ion-item>
                Create UpBook Network
-               <ion-button slot="end" color="primary" type="submit" routerLink="/tabs/tab2"
+               <ion-button size="default" slot="end" color="primary" type="submit" routerLink="/tabs/tab2"
                   [disabled]="profileComplete !== true">
                   Next
                </ion-button>
