@@ -34,13 +34,16 @@
       </div>
 
       <ion-list>
-         <ion-item *ngFor="let contact of filteredContacts">
+         <ion-item *ngFor="let contact of displayedContacts">
             <ion-label>{{contact.name?.givenName || "[missing name]"}} {{contact.name?.familyName}}</ion-label>
             <ion-checkbox slot="start" [(ngModel)]="contact.inNetwork"
                [disabled]="isNetworkSelectionDisabled === true && contact.inNetwork !== true"
                (ngModelChange)="toggleContactForNetwork(contact)"></ion-checkbox>
          </ion-item>
       </ion-list>
-
    </ion-card>
+
+   <ion-infinite-scroll (ionInfinite)="loadContacts(allContacts, $event)" loadingSpinner="bubbles" loadingText="Loading Contacts...">
+      <ion-infinite-scroll-content></ion-infinite-scroll-content>
+   </ion-infinite-scroll>
 </ion-content>

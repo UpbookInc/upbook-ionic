@@ -57,9 +57,9 @@ export class ProfileService {
       var upbookSendMessageApi = 'https://gq3zsrsx63.execute-api.us-east-1.amazonaws.com/default/UpbookSMSApi-1';
       this.http.setDataSerializer('json');
       this.getPersonalProfile().then(profileResponse => {
-         console.log(profileResponse);
+         //console.log(profileResponse);
          var convertedProfileToContactFormat = this.convertPersonalProfileToContact(profileResponse);
-         console.log(convertedProfileToContactFormat);
+         //console.log(convertedProfileToContactFormat);
 
          var profileToSend: any = {}
 

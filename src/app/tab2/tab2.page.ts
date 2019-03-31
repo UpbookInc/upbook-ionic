@@ -16,11 +16,15 @@ export class Tab2Page {
    searching: any = false;
    searchTerm: string = '';
    allContacts;
-   filteredContacts;
+   displayedContacts = [];
+   filteredContacts = [];
    isNetworkSelectionDisabled: boolean = false;
    MAX_IN_NETWORK_CONTACTS_SELECTED = 4;
    selectedNetworkSize: any;
    sending: boolean;
+   currentPage = 0;
+   pageCount = 1;
+   CONTACTS_PER_PAGE = 50;
 
    constructor(private networkStoreService: NetworkStoreService, private platform: Platform,
       private profileService: ProfileService, private debugService: DebugService, public toastController: ToastController) {
@@ -31,6 +35,7 @@ export class Tab2Page {
       if (reset === true) {
          this.searchTerm = '';
       }
+      
       this.filteredContacts = this.allContacts.filter((item) => {
          if (item.name && item.name.formatted) {
             return item.name.formatted.toLowerCase().indexOf(this.searchTerm.toLowerCase()) > -1;
@@ -43,6 +48,11 @@ export class Tab2Page {
             }
          }
       });
+      
+      //resetup page count, etc with new data
+      this.initContactsTable(this.filteredContacts);
+      this.loadContacts(this.filteredContacts);
+
       this.searching = false;
    }
 
@@ -90,18 +100,54 @@ export class Tab2Page {
          if (successResults == null || successResults == undefined) {
             this.debugService.add("Tab2Page.checkIsUBNetworkDatabaseCreated: UB Addressbook to be created.");
             this.networkStoreService.getAllAddressbookContactsFromDevice().then(deviceContacts => {
+
                this.allContacts = this.sortData(deviceContacts);
-               this.filteredContacts = this.sortData(deviceContacts);
+               this.initContactsTable(deviceContacts);
+               this.loadContacts(this.allContacts, undefined);
+
                this.networkStoreService.saveContactsToStore(this.allContacts);
             });
 
          } else {
             this.debugService.add("Tab2Page.checkIsUBNetworkDatabaseCreated: UB addressbook database already exists.");
+
             this.allContacts = this.sortData(successResults);
-            this.filteredContacts = this.sortData(successResults);
+            this.initContactsTable(successResults);
+            this.loadContacts(this.allContacts, undefined);
+
             this.checkForMaximumSelectedNetworkContacts(true);
          }
       }, errorResults => console.log(errorResults));
+   }
+
+   loadContacts(subjectContactData, infiniteScroll?) {
+      let startIndex = this.currentPage * this.CONTACTS_PER_PAGE;
+      let endIndex = startIndex + this.CONTACTS_PER_PAGE;
+      // console.log(startIndex);
+      // console.log(endIndex);
+      this.displayedContacts = this.displayedContacts.concat(
+         subjectContactData.slice(startIndex, endIndex));
+
+      if (infiniteScroll) {
+         infiniteScroll.target.complete();
+      }
+
+      if (this.currentPage === (this.pageCount - 1)) {
+         infiniteScroll.target.disabled = true;
+      } else {
+         this.currentPage++;
+      }
+   }
+
+   private initContactsTable(rawData) {
+      let deviceContactsLength = rawData.length;
+      //console.log(deviceContactsLength);
+
+      let rawPageCount = deviceContactsLength / this.CONTACTS_PER_PAGE;
+      //console.log("rawPageCount: " + rawPageCount);
+
+      this.pageCount = Math.ceil(rawPageCount);
+      //console.log("pageCount: " + this.pageCount);
    }
 
    sortData(array: Array<Contact>): Array<Contact> {
