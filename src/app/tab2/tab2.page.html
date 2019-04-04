@@ -43,7 +43,7 @@
       </ion-list>
    </ion-card>
 
-   <ion-infinite-scroll (ionInfinite)="loadContacts(allContacts, $event)" loadingSpinner="bubbles" loadingText="Loading Contacts...">
+   <ion-infinite-scroll (ionInfinite)="loadMoreContacts($event)" loadingSpinner="bubbles" loadingText="Loading Contacts...">
       <ion-infinite-scroll-content></ion-infinite-scroll-content>
    </ion-infinite-scroll>
 </ion-content>

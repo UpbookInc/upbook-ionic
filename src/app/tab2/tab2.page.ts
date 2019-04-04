@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { NetworkStoreService } from '../networkStore/networkStore.service';
-import { Platform, ToastController } from '@ionic/angular';
+import { Platform, ToastController, IonInfiniteScroll } from '@ionic/angular';
 import { Contact } from '@ionic-native/contacts/ngx';
 import { ProfileService } from '../profile/service/profile.service';
 import { DebugService } from '../debug/debug.service';
@@ -26,6 +26,8 @@ export class Tab2Page {
    pageCount = 1;
    CONTACTS_PER_PAGE = 50;
 
+   @ViewChild(IonInfiniteScroll) infiniteScroll: IonInfiniteScroll;
+
    constructor(private networkStoreService: NetworkStoreService, private platform: Platform,
       private profileService: ProfileService, private debugService: DebugService, public toastController: ToastController) {
    }
@@ -35,7 +37,7 @@ export class Tab2Page {
       if (reset === true) {
          this.searchTerm = '';
       }
-      
+
       this.filteredContacts = this.allContacts.filter((item) => {
          if (item.name && item.name.formatted) {
             return item.name.formatted.toLowerCase().indexOf(this.searchTerm.toLowerCase()) > -1;
@@ -48,8 +50,10 @@ export class Tab2Page {
             }
          }
       });
-      
+
       //resetup page count, etc with new data
+      this.currentPage = 0;
+      this.displayedContacts = [];
       this.initContactsTable(this.filteredContacts);
       this.loadContacts(this.filteredContacts);
 
@@ -120,6 +124,14 @@ export class Tab2Page {
       }, errorResults => console.log(errorResults));
    }
 
+   loadMoreContacts(infiniteScroll?) {
+      if (this.searchTerm && this.searchTerm != '') {
+         this.loadContacts(this.filteredContacts, infiniteScroll);
+      } else {
+         this.loadContacts(this.allContacts, infiniteScroll);
+      }
+   }
+
    loadContacts(subjectContactData, infiniteScroll?) {
       let startIndex = this.currentPage * this.CONTACTS_PER_PAGE;
       let endIndex = startIndex + this.CONTACTS_PER_PAGE;
@@ -133,9 +145,10 @@ export class Tab2Page {
       }
 
       if (this.currentPage === (this.pageCount - 1)) {
-         infiniteScroll.target.disabled = true;
+         this.infiniteScroll.disabled = true;
       } else {
          this.currentPage++;
+         this.infiniteScroll.disabled = false;
       }
    }
 
@@ -152,12 +165,12 @@ export class Tab2Page {
 
    sortData(array: Array<Contact>): Array<Contact> {
       return array.sort((a, b) => {
-         if (a.name && a.name.formatted && b.name && b.name.formatted) {
-            return a.name.formatted < b.name.formatted ? -1 : 1;
-         } else if (a.name && a.name.formatted) {
+         if (a.name && a.name.givenName && b.name && b.name.givenName) {
+            return a.name.givenName.toLowerCase() < b.name.givenName.toLowerCase() ? -1 : 1;
+         } else if (a.name && a.name.givenName) {
             // keeps missing names at bottom of list
             return -1;
-         } else if (b.name && b.name.formatted) {
+         } else if (b.name && b.name.givenName) {
             // keeps missing names at bottom of list
             return 1;
          }

@@ -158,6 +158,10 @@ export class ContactsService {
       });
    }
 
+   //Note: currently only used by the debug tab, but could expand to use this for saving new contacts to address book
+   saveNewContact(contactToSave, onSuccess, onError) {
+      this.executeSave(contactToSave, onSuccess, onError);
+   }
    private executeSave(contactToSave, onSuccess, onError) {
       return contactToSave.save().then(onSuccess, onError);
    }
