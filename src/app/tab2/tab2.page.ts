@@ -20,7 +20,7 @@ export class Tab2Page {
    filteredContacts = [];
    isNetworkSelectionDisabled: boolean = false;
    MAX_IN_NETWORK_CONTACTS_SELECTED = 4;
-   selectedNetworkSize: any;
+   selectedNetworkSize: any = 0;
    sending: boolean;
    currentPage = 0;
    pageCount = 1;
