@@ -62,7 +62,6 @@ export class Tab2Page {
 
    ionViewDidEnter() {
       this.platform.ready().then((readySource) => {
-         this.debugService.add("Tab2Page.ionViewDidEnter: platform ready");
          this.checkIsUBNetworkDatabaseCreated();
       });
    }
@@ -104,12 +103,11 @@ export class Tab2Page {
          if (successResults == null || successResults == undefined) {
             this.debugService.add("Tab2Page.checkIsUBNetworkDatabaseCreated: UB Addressbook to be created.");
             this.networkStoreService.getAllAddressbookContactsFromDevice().then(deviceContacts => {
-
                this.allContacts = this.sortData(deviceContacts);
-               this.initContactsTable(deviceContacts);
+               this.initContactsTable(this.allContacts);
                this.loadContacts(this.allContacts, undefined);
-
                this.networkStoreService.saveContactsToStore(this.allContacts);
+               this.debugService.add("Tab2Page.checkIsUBNetworkDatabaseCreated: saved contacts to UB store.");
             });
 
          } else {
@@ -124,15 +122,15 @@ export class Tab2Page {
       }, errorResults => console.log(errorResults));
    }
 
-   loadMoreContacts(infiniteScroll?) {
+   loadMoreContacts(infiniteScrollParam?) {
       if (this.searchTerm && this.searchTerm != '') {
-         this.loadContacts(this.filteredContacts, infiniteScroll);
+         this.loadContacts(this.filteredContacts, infiniteScrollParam);
       } else {
-         this.loadContacts(this.allContacts, infiniteScroll);
+         this.loadContacts(this.allContacts, infiniteScrollParam);
       }
    }
 
-   loadContacts(subjectContactData, infiniteScroll?) {
+   loadContacts(subjectContactData, infiniteScrollParam?) {
       let startIndex = this.currentPage * this.CONTACTS_PER_PAGE;
       let endIndex = startIndex + this.CONTACTS_PER_PAGE;
       // console.log(startIndex);
@@ -140,15 +138,19 @@ export class Tab2Page {
       this.displayedContacts = this.displayedContacts.concat(
          subjectContactData.slice(startIndex, endIndex));
 
-      if (infiniteScroll) {
-         infiniteScroll.target.complete();
+      if (infiniteScrollParam) {
+         infiniteScrollParam.target.complete();
       }
-
+      
       if (this.currentPage === (this.pageCount - 1)) {
-         this.infiniteScroll.disabled = true;
+         if (this.infiniteScroll) {
+            this.infiniteScroll.disabled = true;
+         }
       } else {
          this.currentPage++;
-         this.infiniteScroll.disabled = false;
+         if (this.infiniteScroll) {
+            this.infiniteScroll.disabled = false;
+         }
       }
    }
 

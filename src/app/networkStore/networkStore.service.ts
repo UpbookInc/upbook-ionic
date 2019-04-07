@@ -31,7 +31,6 @@ export class NetworkStoreService {
          let inNetworkContacts = ubContacts.filter(contact => contact.inNetwork === true);
          return inNetworkContacts;
       }, errorResults => {
-         console.log(errorResults);
          return Promise.resolve(undefined);
       });
    }

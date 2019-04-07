@@ -46,7 +46,7 @@ export class ProfilePage implements OnInit {
          }
          this.debugService.add("ProfilePage.isNetworkBeenEstablished, nextButtonNeeded: " + this.networkEstablished);
       }, errorResults => {
-         this.debugService.add("ProfilePage.isNetworkBeenEstablished.");
+         this.debugService.add("ProfilePage.isNetworkBeenEstablished error:");
          this.debugService.add(errorResults);
       });
    }
