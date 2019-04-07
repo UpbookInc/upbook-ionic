@@ -12,12 +12,16 @@ import { ContactsService } from 'src/app/contacts/contacts.service';
 // - SUPER LOW Priority: Name change: consider capturing original name incase they performed a name change we can send both as part of update 
 //     to also check for the old name.
 // Note: return new Profile("Bruce", "Shaw", "321-123-4567", "bruce@fractalstack.com", "123 Street Rd, Westchester, PA, 15640", "Fractal Stack LLC");
+
+const upbookSendMessageApi = 'https://gq3zsrsx63.execute-api.us-east-1.amazonaws.com/default/UpbookSMSApi-1';
+
 @Injectable({
    providedIn: 'root'
 })
 export class ProfileService {
 
    private readonly UB_PROFILE_KEY = 'UB_PROFILE';
+   
 
    constructor(public storage: Storage, private http: HTTP, private debugService: DebugService, private networkStoreService: NetworkStoreService,
       private contactService: ContactsService) { }
@@ -38,71 +42,76 @@ export class ProfileService {
    }
 
    sendProfileToNetwork(onSuccess, onFail) {
-      console.log("init send profile to network");
-      function success(data) {
-         console.log("http success");
-         console.log(data.status);
-         // console.log(data.data); // data received by server
-         // console.log(data.headers);
-         onSuccess();
-      }
-      function error(errorData) {
-         console.log("http error");
-         console.log(errorData.status);
-         console.log(errorData.error); // error message as string
-         // console.log(errorData.headers);
-         onFail();
-      }
+      this.debugService.add("ProfileService.sendProfileToNetwork: init send profile to network");
 
-      var upbookSendMessageApi = 'https://gq3zsrsx63.execute-api.us-east-1.amazonaws.com/default/UpbookSMSApi-1';
       this.http.setDataSerializer('json');
       this.getPersonalProfile().then(profileResponse => {
-         //console.log(profileResponse);
-         var convertedProfileToContactFormat = this.convertPersonalProfileToContact(profileResponse);
-         //console.log(convertedProfileToContactFormat);
+         this.debugService.add("ProfileService.sendProfileToNetwork: got profileResponse");
+         if (profileResponse != undefined || profileResponse != null) {
 
-         var profileToSend: any = {}
+            var convertedProfileToContactFormat = this.convertPersonalProfileToContact(profileResponse);
+            //console.log(convertedProfileToContactFormat);
 
-         this.networkStoreService.getAllAddressbookContactsFromDevice().then(deviceContacts => {
-            this.networkStoreService.getUBSelectedNetworkContacts().then(inNetworkContacts => {
+            var profileToSend: any = {}
 
-               // get selected network contacts' phoneNumbers from device's contact list 
-               var contactsFromDeviceInNetwork = inNetworkContacts.map(inNetworkContact => {
-                  return deviceContacts.find(deviceContact => {
-                     return deviceContact.name.givenName === inNetworkContact.name.givenName &&
-                        deviceContact.name.familyName === inNetworkContact.name.familyName;
+            this.networkStoreService.getAllAddressbookContactsFromDevice().then(deviceContacts => {
+               this.debugService.add("ProfileService.sendProfileToNetwork: got deviceContacts");
+
+               this.networkStoreService.getUBSelectedNetworkContacts().then(inNetworkContacts => {
+                  this.debugService.add("ProfileService.sendProfileToNetwork: got inNetworkContacts");
+
+                  // get selected network contacts' phoneNumbers from device's contact list 
+                  var contactsFromDeviceInNetwork = inNetworkContacts.map(inNetworkContact => {
+                     return deviceContacts.find(deviceContact => {
+                        return deviceContact.name.givenName === inNetworkContact.name.givenName &&
+                           deviceContact.name.familyName === inNetworkContact.name.familyName;
+                     });
                   });
+                  //console.log(contactsFromDeviceInNetwork);
+
+                  //TODO: eventually may need to select main or preferred number
+                  var inNetworkContactNumbers = contactsFromDeviceInNetwork.map(contactFromDeviceinNetwork => {
+                     return contactFromDeviceinNetwork.phoneNumbers[0].value;
+                  });
+                  //console.log(inNetworkContactNumbers);
+
+                  var normalizedInNetworkNumbersFromDevice = this.contactService.normalizePhoneNumberAsStringArray(inNetworkContactNumbers);
+
+                  // bake in the '1' prefix if needed
+                  normalizedInNetworkNumbersFromDevice = normalizedInNetworkNumbersFromDevice.map(inNetworkContact => {
+                     if (inNetworkContact.length == 10) {
+                        inNetworkContact = '1' + inNetworkContact;
+                     }
+                     return inNetworkContact;
+                  });
+                  console.log(normalizedInNetworkNumbersFromDevice);
+
+                  profileToSend.profile = convertedProfileToContactFormat;
+                  profileToSend.networkNumbers = normalizedInNetworkNumbersFromDevice;
+                  // profileToSend.networkNumbers = ['19417163554', '14074317596'];
+                  console.log(profileToSend);
+
+                  this.http.post(upbookSendMessageApi,
+                     profileToSend,
+                     {})
+                     .then((data) => {
+                        this.debugService.add("ProfileService.sendProfileToNetwork: http success");
+                        // console.log(data.status);
+                        // console.log(data.data); // data received by server
+                        // console.log(data.headers);
+                        onSuccess();
+                     }, (errorData) => {
+                        this.debugService.add("ProfileService.sendProfileToNetwork: http error");
+                        // console.log(errorData.status);
+                        // console.log(errorData.error); // error message as string
+                        // console.log(errorData.headers);
+                        onFail();
+                     });
                });
-               //console.log(contactsFromDeviceInNetwork);
-
-               //TODO: eventually may need to select main or preferred number
-               var inNetworkContactNumbers = contactsFromDeviceInNetwork.map(contactFromDeviceinNetwork => {
-                  return contactFromDeviceinNetwork.phoneNumbers[0].value;
-               });
-               //console.log(inNetworkContactNumbers);
-
-               var normalizedInNetworkNumbersFromDevice = this.contactService.normalizePhoneNumberAsStringArray(inNetworkContactNumbers);
-
-               // bake in the '1' prefix if needed
-               normalizedInNetworkNumbersFromDevice = normalizedInNetworkNumbersFromDevice.map(inNetworkContact => {
-                  if (inNetworkContact.length == 10) {
-                     inNetworkContact = '1' + inNetworkContact;
-                  }
-                  return inNetworkContact;
-               });
-               console.log(normalizedInNetworkNumbersFromDevice);
-
-               profileToSend.profile = convertedProfileToContactFormat;
-               profileToSend.networkNumbers = normalizedInNetworkNumbersFromDevice;
-               // profileToSend.networkNumbers = ['19417163554', '14074317596'];
-               console.log(profileToSend);
-
-               this.http.post(upbookSendMessageApi,
-                  profileToSend,
-                  {})
-                  .then(success, error);
             });
-         });
+         } else {
+            onFail("Profile missing");
+         }
       });
    }
 

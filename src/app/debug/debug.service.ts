@@ -13,7 +13,7 @@ export class DebugService {
    //TODO: add production flag eventually
    add(messageToAdd) {
       if (this.allDebugOutput != "") {
-         this.allDebugOutput += "::::"
+         this.allDebugOutput += "::::\n"
       }
       console.log(messageToAdd);
       this.allDebugOutput += messageToAdd;

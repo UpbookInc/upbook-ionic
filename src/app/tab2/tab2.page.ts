@@ -188,12 +188,16 @@ export class Tab2Page {
 
    sendProfileToNetwork() {
       this.sending = true;
-      this.profileService.sendProfileToNetwork(() => {
+      this.profileService.sendProfileToNetwork((success?) => {
          this.sending = false;
          this.presentToast('Profile Successfully Sent to Network!', 'success');
-      }, () => {
+      }, (error?) => {
          this.sending = false;
-         this.presentToast('Send failed, try back later', 'danger');
+         if (error) {
+            this.presentToast(error, 'danger');
+         } else {
+            this.presentToast('Send failed, try back later', 'danger');
+         }
       });
    }
 }
