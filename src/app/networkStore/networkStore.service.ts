@@ -3,6 +3,7 @@ import { Contacts, Contact, ContactField, ContactName, ContactFieldType } from '
 import { Platform } from '@ionic/angular';
 import { Storage } from '@ionic/storage';
 import { DebugService } from '../debug/debug.service';
+import * as _ from 'lodash';
 
 @Injectable({
    providedIn: 'root'
@@ -12,10 +13,10 @@ export class NetworkStoreService {
    private readonly UB_ADDRESS_BOOK_CONTACTS_KEY = 'UB_ADDRESS_BOOK_CONTACTS';
 
    private isNative: Boolean = false; //TODO: comment out this check for production release
-   
+
+   private allDeviceContacts;
+
    constructor(private contacts: Contacts, public storage: Storage, private platform: Platform, private debugService: DebugService) {
-      //TODO: comment out this check for production release
-      this.debugService.add("AddressbookService.constr: constructor.");
       this.platform.ready().then(() => {
          this.debugService.add("AddressbookService.constr: platform ready.");
          if (this.platform.is('cordova')) {
@@ -25,11 +26,11 @@ export class NetworkStoreService {
       });
    }
 
-   getUBSelectedNetworkContacts(): Promise<any>{
+   getUBSelectedNetworkContacts(): Promise<any> {
       return this.getUBDatabaseOfContacts(ubContacts => {
          let inNetworkContacts = ubContacts.filter(contact => contact.inNetwork === true);
          return inNetworkContacts;
-      }, errorResults => { 
+      }, errorResults => {
          console.log(errorResults);
          return Promise.resolve(undefined);
       });
@@ -84,34 +85,44 @@ export class NetworkStoreService {
 
    }
 
-   //TODO: only use this on initial run to get contacts.  Or maybe to refresh with UB db for differences?
+   // establishes device contacts object or returns if it's already been set
    getAllAddressbookContactsFromDevice(): Promise<Contact[]> {
-      //TODO: clean up and request real data that we need
-      // how to turn off so we don't have errors when testing locally, maybe figure way to mock data when not on device??
-      // consider ['*']
+      //TODO: comment out this check for production release
+      if (this.isNative === true) {
+         if (this.allDeviceContacts == null || this.allDeviceContacts == undefined || this.allDeviceContacts.length < 1) {
+            return this.queryAllDeviceContacts().then((deviceContacts) => {
+               //here we copy (using lodash) the device contacts into a service object to hold the contacts
+               this.allDeviceContacts = _.cloneDeep(deviceContacts);
+               return Promise.resolve(this.allDeviceContacts);
+            });
+         } else {
+            //we already have queried and stored the device contacts, just return list
+            return Promise.resolve(this.allDeviceContacts);
+         }
+      } else {
+         return this.returnMockContacts();
+      }
+   }
+
+   private queryAllDeviceContacts(): Promise<Contact[]> {
+      //TODO: clean up and request actual data that we need
       var opts = {
          //filter: "M",
          multiple: true,
          //hasPhoneNumber: true,
          fields: ['displayName', 'name']
       };
-
-      //TODO: comment out this check for production release
-      if (this.isNative === true) {
-         return this.contacts.find(['*'], opts).then(
-            (contactsFound) => {
-               //console.log('Contact found!', contactsFound)
-               return contactsFound;
-            },
-            (error: any) => {
-               //TODO: handle known error cases like denied permissions.
-               console.error('Error finding contacts.', error);
-               return Promise.resolve(undefined);
-            }
-         );
-      } else {
-         return this.returnMockContacts();
-      }
+      return this.contacts.find(['*'], opts).then(
+         (contactsFound) => {
+            //console.log('Contact found!', contactsFound)
+            return contactsFound;
+         },
+         (error: any) => {
+            //TODO: handle known error cases like denied permissions.
+            console.error('Error finding contacts.', error);
+            return Promise.resolve(undefined);
+         }
+      );
    }
 
    //TODO: comment out this check for production release
