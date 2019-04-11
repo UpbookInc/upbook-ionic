@@ -1,13 +1,28 @@
 import { Injectable } from '@angular/core';
 import { Contact, Contacts, ContactField } from '@ionic-native/contacts/ngx';
 import { DebugService } from '../debug/debug.service';
+import { Platform } from '@ionic/angular';
+
+import * as _ from 'lodash';
 
 @Injectable({
    providedIn: 'root'
 })
 export class ContactsService {
 
-   constructor(private contacts: Contacts, private debugService: DebugService) { }
+   currentPlatform;
+
+   constructor(private platform: Platform, private contacts: Contacts, private debugService: DebugService) {
+      this.platform.ready().then(() => {
+         if (this.platform.is('android')) {
+            this.currentPlatform = 'android';
+         } else if (this.platform.is('ios')) {
+            this.currentPlatform = 'ios';
+         } else {
+            this.currentPlatform = 'unknown';
+         }
+      });
+   }
 
    // TODO:
    // - finish other deltas
@@ -19,11 +34,14 @@ export class ContactsService {
 
    buildContactWithUpdates(contactWithUpdates): Promise<Contact> {
 
+      //TODO: eventually, if multiple contacts with same name found, will have to prompt user to select
+      // This could be automated if we have the previous used phonenumber
       return this.findContactByName(contactWithUpdates.displayName).then(contactFound => {
          this.debugService.add("ContactsService.buildContactWithUpdates: Contact found");
+         // this.debugService.add(contactFound);
 
          if (contactFound[0]) {
-            var contactToUpdate = contactFound[0];
+            let contactToUpdate = _.cloneDeep(contactFound[0]);
             contactToUpdate.deltas = {};
 
             //DEBUG ONLY REMOVE - change contact updates here for testing
@@ -108,48 +126,65 @@ export class ContactsService {
    updateContactPhoneNumbers(contactWithUpdates) {
       var contactNumUpdates = [];
       contactWithUpdates.phoneNumbers.map(num => {
-         contactNumUpdates.push(new ContactField('', num.value, false));
+         if (this.currentPlatform === 'ios') {
+            //TODO: this needs to have the id of the specific phone number array to work.  Otherwise, it will
+            //just add a new number
+            contactNumUpdates.push({ id: 0, value: contactWithUpdates.phoneNumbers[0].value });
+         } else if (this.currentPlatform === 'android') {
+            contactNumUpdates.push(new ContactField('', num.value, false));
+         }
       });
       return contactNumUpdates;
+   }
+
+   prepareContactForUpdatesForAndroid(contactToUpdate): Promise<any> {
+      console.log(contactToUpdate);
+      return this.executeSave(contactToUpdate, (contactAfterPhoneNumsCleared) => {
+         return contactAfterPhoneNumsCleared;
+      }, (error: any) => {
+         this.debugService.add("ContactsService.updateContact: Contact update to clear out phone numbers failed");
+         this.debugService.add(error);
+         return Promise.resolve(undefined);
+      });
+   }
+
+   saveChangesToContact(contactToUpdate) {
+      this.executeSave(contactToUpdate, (contactAfterSave) => {
+         this.debugService.add("ContactsService.updateContact: Contact updates saved.");
+         // console.log(contactAfterSave);
+      }, (error: any) => {
+         this.debugService.add("ContactsService.updateContact: Contact updatesfailed");
+         this.debugService.add(error);
+      });
    }
 
    //TODO: maybe this isn't a contact object passed in, but instead our internal data structure to house contact info
    //TODO: consider checking what needs updating first before performing update incase additional actions need performed
    updateContact(contactWithUpdates: Contact) {
-      var contactToUpdate;
       this.findContactByName(contactWithUpdates.displayName).then(contactFound => {
          this.debugService.add("ContactsService.updateContact: Contact found");
+         // this.debugService.add(contactFound);
 
          //TODO: create new contact if doesn't exist
          if (contactFound != undefined && contactFound != null && contactFound.length > 0) {
 
-            contactToUpdate = contactFound[0];
+            let contactToUpdate = _.cloneDeep(contactFound[0]);
             contactToUpdate._objectInstance.rawId = contactToUpdate.rawId;
 
             //TODO: perform checks before updating. Only update if needed.
             //TODO: pull this save out into its own method so we can chain these save requests together 
             contactToUpdate.phoneNumbers = [];
-            //Initial save to clear out phone numbers
-            this.executeSave(contactToUpdate, (contactsFound) => {
-               this.debugService.add("ContactsService.updateContact: Contact update complete to clear phone numbers");
-               console.log(contactsFound);
 
-               //apply phone number changes
+            if (this.currentPlatform === 'ios') {
                contactToUpdate.phoneNumbers = this.updateContactPhoneNumbers(contactWithUpdates);
+               this.saveChangesToContact(contactToUpdate);
 
-
-               this.executeSave(contactToUpdate, (contactsFound) => {
-                  this.debugService.add("ContactsService.updateContact: Contact updates saved.");
-                  console.log(contactsFound);
-               }, (error: any) => {
-                  this.debugService.add("ContactsService.updateContact: Contact updatesfailed");
-                  this.debugService.add(error);
+            } else if (this.currentPlatform === 'android') {
+               this.prepareContactForUpdatesForAndroid(contactToUpdate).then((preparedContact) => {
+                  preparedContact.phoneNumbers = this.updateContactPhoneNumbers(contactWithUpdates);
+                  this.saveChangesToContact(preparedContact);
                });
-
-            }, (error: any) => {
-               this.debugService.add("ContactsService.updateContact: Contact update to clear out phone numbers failed");
-               this.debugService.add(error);
-            });
+            }
          }
       }, (error: any) => {
          //TODO: handle known error cases like denied permissions.
@@ -177,7 +212,8 @@ export class ContactsService {
          (contactsFound) => {
             this.debugService.add("ContactsService.findContactByName: Contact found");
             //this.debugService.add(contactsFound);
-            return contactsFound;
+            let contactsFoundCloned = _.cloneDeep(contactsFound);
+            return contactsFoundCloned;
          },
          (error: any) => {
             //TODO: handle known error cases like denied permissions.

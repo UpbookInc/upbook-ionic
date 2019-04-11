@@ -16,7 +16,13 @@ export class ContactUpdatePage implements OnInit {
    constructor(private modalController: ModalController, private navParams: NavParams) {
       //TODO: null checks
       this.updateNeeded = navParams.data.updateNeeded;
-      this.displayName = navParams.data._objectInstance.displayName;
+
+      if (navParams.data._objectInstance.name) {
+         this.displayName = navParams.data._objectInstance.name.givenName + ' ' + navParams.data._objectInstance.name.familyName;
+      } else {
+         this.displayName = "[missing name]"
+      }
+
       if (this.updateNeeded === true) {
          this.contactDeltas = navParams.data.deltas;
          this.contactUpdates = navParams.data._objectInstance;
