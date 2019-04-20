@@ -2,6 +2,7 @@ import { Component, OnInit, EventEmitter, Output, HostListener } from '@angular/
 import { ProfileService } from '../../service/profile.service';
 import { Profile } from '../../model/profile';
 import { DebugService } from 'src/app/debug/debug.service';
+import { ToastController } from '@ionic/angular';
 
 @Component({
    selector: 'app-profile-form',
@@ -13,7 +14,7 @@ export class ProfileFormComponent implements OnInit {
    @Output() saveClicked: EventEmitter<null> = new EventEmitter<null>();
    profile: Profile = new Profile();
 
-   constructor(private profileService: ProfileService, private debugService: DebugService) { }
+   constructor(private profileService: ProfileService, private debugService: DebugService, public toastController: ToastController) { }
 
    // this is called by the parent profile page each time the view becomes active
    getPersonalProfile() {
@@ -35,6 +36,16 @@ export class ProfileFormComponent implements OnInit {
       this.profileService.saveProfileToUBDatabase(this.profile);
       // emits event to parent profile page
       this.saveClicked.emit();
+      this.presentToast('Profile Saved!', 'success');
+   }
+
+   async presentToast(message, color) {
+      const toast = await this.toastController.create({
+         message: message,
+         duration: 3000,
+         color: color
+      });
+      toast.present();
    }
 
    ngOnInit() { }
