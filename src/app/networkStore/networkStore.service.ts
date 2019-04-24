@@ -4,6 +4,7 @@ import { Platform } from '@ionic/angular';
 import { Storage } from '@ionic/storage';
 import { DebugService } from '../debug/debug.service';
 import * as _ from 'lodash';
+import { ContactsService } from '../contacts/contacts.service';
 
 @Injectable({
    providedIn: 'root'
@@ -16,7 +17,9 @@ export class NetworkStoreService {
 
    private allDeviceContacts;
 
-   constructor(private contacts: Contacts, public storage: Storage, private platform: Platform, private debugService: DebugService) {
+   constructor(private contacts: Contacts, public storage: Storage, private platform: Platform, private debugService: DebugService,
+      private contactsService: ContactsService) {
+
       this.platform.ready().then(() => {
          this.debugService.add("AddressbookService.constr: platform ready.");
          if (this.platform.is('cordova')) {
@@ -81,7 +84,6 @@ export class NetworkStoreService {
       } else {
          return contactToParse;
       }
-
    }
 
    // establishes device contacts object or returns if it's already been set
@@ -89,9 +91,8 @@ export class NetworkStoreService {
       //TODO: comment out this check for production release
       if (this.isNative === true) {
          if (this.allDeviceContacts == null || this.allDeviceContacts == undefined || this.allDeviceContacts.length < 1) {
-            return this.queryAllDeviceContacts().then((deviceContacts) => {
-               //here we copy (using lodash) the device contacts into a service object to hold the contacts
-               this.allDeviceContacts = _.cloneDeep(deviceContacts);
+            return this.contactsService.queryAllDeviceContacts().then((deviceContacts) => {
+               this.allDeviceContacts = deviceContacts;
                return Promise.resolve(this.allDeviceContacts);
             });
          } else {
@@ -101,27 +102,6 @@ export class NetworkStoreService {
       } else {
          return this.returnMockContacts();
       }
-   }
-
-   private queryAllDeviceContacts(): Promise<Contact[]> {
-      //TODO: clean up and request actual data that we need
-      var opts = {
-         //filter: "M",
-         multiple: true,
-         //hasPhoneNumber: true,
-         fields: ['displayName', 'name']
-      };
-      return this.contacts.find(['*'], opts).then(
-         (contactsFound) => {
-            //console.log('Contact found!', contactsFound)
-            return contactsFound;
-         },
-         (error: any) => {
-            //TODO: handle known error cases like denied permissions.
-            console.error('Error finding contacts.', error);
-            return Promise.resolve(undefined);
-         }
-      );
    }
 
    //TODO: comment out this check for production release

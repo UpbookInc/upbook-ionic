@@ -92,10 +92,43 @@ export class ContactsService {
 
             };
          }
-
       }, (error: any) => {
-         //TODO: handle known error cases like denied permissions.
          this.debugService.add("ContactsService.buildContactWithUpdates: Error finding contacts.");
+         this.debugService.add(error);
+         return Promise.resolve(undefined);
+      });
+   }
+
+   //TODO: maybe this isn't a contact object passed in, but instead our internal data structure to house contact info
+   //TODO: consider checking what needs updating first before performing update incase additional actions need performed
+   updateContact(contactWithUpdates: Contact): Promise<any> {
+      return this.findContactByName(contactWithUpdates.displayName).then(contactFound => {
+         this.debugService.add("ContactsService.updateContact: Contact found");
+         // this.debugService.add(contactFound);
+
+         //TODO: create new contact if doesn't exist
+         if (contactFound != undefined && contactFound != null && contactFound.length > 0) {
+
+            let contactToUpdate: any = _.cloneDeep(contactFound[0]);
+            contactToUpdate._objectInstance.rawId = contactToUpdate.rawId;
+
+            //TODO: perform checks before updating. Only update if needed.
+            //TODO: pull this save out into its own method so we can chain these save requests together 
+            contactToUpdate.phoneNumbers = [];
+
+            if (this.currentPlatform === 'ios') {
+               contactToUpdate.phoneNumbers = this.updateContactPhoneNumbers(contactWithUpdates);
+               return this.saveChangesToContact(contactToUpdate);
+
+            } else if (this.currentPlatform === 'android') {
+               return this.prepareContactForUpdatesForAndroid(contactToUpdate).then((preparedContact) => {
+                  preparedContact.phoneNumbers = this.updateContactPhoneNumbers(contactWithUpdates);
+                  return this.saveChangesToContact(preparedContact);
+               });
+            }
+         }
+      }, (error: any) => {
+         this.debugService.add("ContactsService.updateContact: Error finding contacts.");
          this.debugService.add(error);
          return Promise.resolve(undefined);
       });
@@ -148,48 +181,44 @@ export class ContactsService {
       });
    }
 
+   findContactByName(nameToSearch: string): Promise<Contact[]> {
+      var opts = {
+         filter: nameToSearch,
+         multiple: false,
+         desiredFields: ['displayName', 'name', 'phoneNumbers', 'addresses', 'emails', 'organizations']
+      };
+      return this.performDeviceContactQuery(opts);
+   }
+
+   queryAllDeviceContacts(): Promise<Contact[]> {
+      var opts = {
+         multiple: true,
+         desiredFields: ['displayName', 'name', 'phoneNumbers', 'addresses', 'emails', 'organizations']
+      };
+      return this.performDeviceContactQuery(opts);
+   }
+
+   private performDeviceContactQuery(options): Promise<Contact[]> {
+      return this.contacts.find(['*'], options).then(
+         (contactsFound) => {
+            this.debugService.add("ContactsService.performDeviceContactQuery: contact(s) found.");
+            let contactsFoundCloned = _.cloneDeep(contactsFound);
+            return contactsFoundCloned;
+         },
+         (error: any) => {
+            this.debugService.add("ContactsService.performDeviceContactQuery: Error finding contacts.");
+            this.debugService.add(error);
+            return Promise.resolve(undefined);
+         }
+      );
+   }
+
    saveChangesToContact(contactToUpdate): Promise<any> {
       return this.executeSave(contactToUpdate, (contactAfterSave) => {
          this.debugService.add("ContactsService.updateContact: Contact updates saved.");
          return contactAfterSave;
       }, (error: any) => {
          this.debugService.add("ContactsService.updateContact: Contact updatesfailed");
-         this.debugService.add(error);
-         return Promise.resolve(undefined);
-      });
-   }
-
-   //TODO: maybe this isn't a contact object passed in, but instead our internal data structure to house contact info
-   //TODO: consider checking what needs updating first before performing update incase additional actions need performed
-   updateContact(contactWithUpdates: Contact): Promise<any> {
-      return this.findContactByName(contactWithUpdates.displayName).then(contactFound => {
-         this.debugService.add("ContactsService.updateContact: Contact found");
-         // this.debugService.add(contactFound);
-
-         //TODO: create new contact if doesn't exist
-         if (contactFound != undefined && contactFound != null && contactFound.length > 0) {
-
-            let contactToUpdate = _.cloneDeep(contactFound[0]);
-            contactToUpdate._objectInstance.rawId = contactToUpdate.rawId;
-
-            //TODO: perform checks before updating. Only update if needed.
-            //TODO: pull this save out into its own method so we can chain these save requests together 
-            contactToUpdate.phoneNumbers = [];
-
-            if (this.currentPlatform === 'ios') {
-               contactToUpdate.phoneNumbers = this.updateContactPhoneNumbers(contactWithUpdates);
-               return this.saveChangesToContact(contactToUpdate);
-
-            } else if (this.currentPlatform === 'android') {
-               return this.prepareContactForUpdatesForAndroid(contactToUpdate).then((preparedContact) => {
-                  preparedContact.phoneNumbers = this.updateContactPhoneNumbers(contactWithUpdates);
-                  return this.saveChangesToContact(preparedContact);
-               });
-            }
-         }
-      }, (error: any) => {
-         //TODO: handle known error cases like denied permissions.
-         this.debugService.add("ContactsService.updateContact: Error finding contacts.");
          this.debugService.add(error);
          return Promise.resolve(undefined);
       });
@@ -203,26 +232,4 @@ export class ContactsService {
       return contactToSave.save().then(onSuccess, onError);
    }
 
-   findContactByName(nameToSearch: string): Promise<Contact> {
-      var opts = {
-         filter: nameToSearch,
-         multiple: false,
-         //hasPhoneNumber: true,
-         desiredFields: ['displayName', 'name', 'phoneNumbers', 'addresses', 'emails']
-      };
-      return this.contacts.find(['*'], opts).then(
-         (contactsFound) => {
-            this.debugService.add("ContactsService.findContactByName: Contact found");
-            //this.debugService.add(contactsFound);
-            let contactsFoundCloned = _.cloneDeep(contactsFound);
-            return contactsFoundCloned;
-         },
-         (error: any) => {
-            //TODO: handle known error cases like denied permissions.
-            this.debugService.add("ContactsService.findContactByName: Error finding contacts.");
-            this.debugService.add(error);
-            return Promise.resolve(undefined);
-         }
-      );
-   }
 }
