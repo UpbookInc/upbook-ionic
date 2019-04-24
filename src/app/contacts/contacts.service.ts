@@ -148,20 +148,21 @@ export class ContactsService {
       });
    }
 
-   saveChangesToContact(contactToUpdate) {
-      this.executeSave(contactToUpdate, (contactAfterSave) => {
+   saveChangesToContact(contactToUpdate): Promise<any> {
+      return this.executeSave(contactToUpdate, (contactAfterSave) => {
          this.debugService.add("ContactsService.updateContact: Contact updates saved.");
-         // console.log(contactAfterSave);
+         return contactAfterSave;
       }, (error: any) => {
          this.debugService.add("ContactsService.updateContact: Contact updatesfailed");
          this.debugService.add(error);
+         return Promise.resolve(undefined);
       });
    }
 
    //TODO: maybe this isn't a contact object passed in, but instead our internal data structure to house contact info
    //TODO: consider checking what needs updating first before performing update incase additional actions need performed
-   updateContact(contactWithUpdates: Contact) {
-      this.findContactByName(contactWithUpdates.displayName).then(contactFound => {
+   updateContact(contactWithUpdates: Contact): Promise<any> {
+      return this.findContactByName(contactWithUpdates.displayName).then(contactFound => {
          this.debugService.add("ContactsService.updateContact: Contact found");
          // this.debugService.add(contactFound);
 
@@ -177,12 +178,12 @@ export class ContactsService {
 
             if (this.currentPlatform === 'ios') {
                contactToUpdate.phoneNumbers = this.updateContactPhoneNumbers(contactWithUpdates);
-               this.saveChangesToContact(contactToUpdate);
+               return this.saveChangesToContact(contactToUpdate);
 
             } else if (this.currentPlatform === 'android') {
-               this.prepareContactForUpdatesForAndroid(contactToUpdate).then((preparedContact) => {
+               return this.prepareContactForUpdatesForAndroid(contactToUpdate).then((preparedContact) => {
                   preparedContact.phoneNumbers = this.updateContactPhoneNumbers(contactWithUpdates);
-                  this.saveChangesToContact(preparedContact);
+                  return this.saveChangesToContact(preparedContact);
                });
             }
          }
@@ -190,6 +191,7 @@ export class ContactsService {
          //TODO: handle known error cases like denied permissions.
          this.debugService.add("ContactsService.updateContact: Error finding contacts.");
          this.debugService.add(error);
+         return Promise.resolve(undefined);
       });
    }
 

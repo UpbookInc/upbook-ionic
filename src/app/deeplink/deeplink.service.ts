@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Deeplinks } from '@ionic-native/deeplinks/ngx';
-import { NavController } from '@ionic/angular';
+import { NavController, ToastController } from '@ionic/angular';
 import { DebugService } from '../debug/debug.service';
 import { ModalController } from '@ionic/angular';
 import { ContactUpdatePage } from '../contacts/contact-update/contact-update.page';
@@ -24,7 +24,8 @@ import { Contact } from '@ionic-native/contacts/ngx';
 export class DeeplinkService {
 
    constructor(protected deeplinks: Deeplinks, protected navController: NavController, private zone: NgZone,
-      private debugService: DebugService, private modalController: ModalController, private contactsService: ContactsService) { }
+      private debugService: DebugService, private modalController: ModalController, private contactsService: ContactsService, 
+      public toastController: ToastController) { }
 
    setupDeepLinkRouting() {
       this.deeplinks.route({
@@ -58,7 +59,14 @@ export class DeeplinkService {
 
             modal.onDidDismiss().then(data => {
                if (data.data.save === true) {
-                  this.contactsService.updateContact(contactUpdates)
+                  this.presentToast('Saving contact updates, please wait...', 'secondary');
+                  this.contactsService.updateContact(contactUpdates).then((updatedContact) => {
+                     if (updatedContact == undefined) {
+                        this.presentToast('Failed to save contact updates, manually update', 'danger');
+                     } else {
+                        this.presentToast('Successfully saved updates!', 'success');
+                     }
+                  });
                }
             });
          });
@@ -89,5 +97,14 @@ export class DeeplinkService {
       var decodedAndParsedContactUpdates = JSON.parse(decodedUpdate);
       //console.log(decodedAndParsedContactUpdates);
       return decodedAndParsedContactUpdates;
+   }
+
+   async presentToast(message, color) {
+      const toast = await this.toastController.create({
+         message: message,
+         duration: 3000,
+         color: color
+      });
+      toast.present();
    }
 }

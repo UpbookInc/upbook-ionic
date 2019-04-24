@@ -62,6 +62,10 @@ export class Tab2Page {
 
    ionViewDidEnter() {
       this.platform.ready().then((readySource) => {
+         this.displayedContacts = [];
+         this.filteredContacts = [];
+         this.searchTerm = '';
+         this.searching = false;
          this.checkIsUBNetworkDatabaseCreated();
       });
    }
