@@ -29,17 +29,19 @@ export class NetworkStoreService {
       });
    }
 
-   getUBSelectedNetworkContacts(): Promise<any> {
-      return this.getUBDatabaseOfContacts(ubContacts => {
+   async getUBSelectedNetworkContacts(): Promise<any> {
+      try {
+         const ubContacts = await this.getUBDatabaseOfContacts();
          let inNetworkContacts = ubContacts.filter(contact => contact.inNetwork === true);
          return inNetworkContacts;
-      }, errorResults => {
-         return Promise.resolve(undefined);
-      });
+      } catch (error) {
+         return Promise.reject(undefined);
+      }
    }
 
-   updateMultipleUBContacts(contactsToUpdate: Array<Contact>) {
-      this.getUBDatabaseOfContacts(contactsForUpdate => {
+   async updateMultipleUBContacts(contactsToUpdate: Array<Contact>) {
+      try {
+         const contactsForUpdate = await this.getUBDatabaseOfContacts();
          contactsToUpdate.map(contactToUpdate => {
             let filteredContactToUpdateIndex = contactsForUpdate.findIndex(contact => contact.id == contactToUpdate.id);
             if (filteredContactToUpdateIndex > -1) {
@@ -47,16 +49,26 @@ export class NetworkStoreService {
             }
          });
          this.saveContactsToStore(contactsForUpdate);
-      }, errorResults => console.log(errorResults));
+      } catch (error) {
+         return Promise.reject(undefined);
+      }
    }
 
-   getUBDatabaseOfContacts(success, error): Promise<string> {
-      return this.storage.get(this.UB_ADDRESS_BOOK_CONTACTS_KEY).then(success, error);
-   }
-
-   saveContactsToStore(contactsToSave: Contact[]) {
-      let parsedContactsToSave = this.parseJsonStringIntoContactsArray(JSON.stringify(contactsToSave))
-      this.storage.set(this.UB_ADDRESS_BOOK_CONTACTS_KEY, parsedContactsToSave);
+   // establishes device contacts object or returns if it's already been set
+   async getAllAddressbookContactsFromDevice(): Promise<Contact[]> {
+      //TODO: comment out this check for production release
+      if (this.isNative === true) {
+         if (this.allDeviceContacts == null || this.allDeviceContacts == undefined || this.allDeviceContacts.length < 1) {
+            const deviceContacts = await this.contactsService.queryAllDeviceContacts();
+            this.allDeviceContacts = deviceContacts;
+            return Promise.resolve(this.allDeviceContacts);
+         } else {
+            //we already have queried and stored the device contacts, just return list
+            return Promise.resolve(this.allDeviceContacts);
+         }
+      } else {
+         return this.returnMockContacts();
+      }
    }
 
    private parseJsonStringIntoContactsArray(contactsJsonString: string) {
@@ -86,22 +98,13 @@ export class NetworkStoreService {
       }
    }
 
-   // establishes device contacts object or returns if it's already been set
-   getAllAddressbookContactsFromDevice(): Promise<Contact[]> {
-      //TODO: comment out this check for production release
-      if (this.isNative === true) {
-         if (this.allDeviceContacts == null || this.allDeviceContacts == undefined || this.allDeviceContacts.length < 1) {
-            return this.contactsService.queryAllDeviceContacts().then((deviceContacts) => {
-               this.allDeviceContacts = deviceContacts;
-               return Promise.resolve(this.allDeviceContacts);
-            });
-         } else {
-            //we already have queried and stored the device contacts, just return list
-            return Promise.resolve(this.allDeviceContacts);
-         }
-      } else {
-         return this.returnMockContacts();
-      }
+   async getUBDatabaseOfContacts(): Promise<any[]> {
+      return this.storage.get(this.UB_ADDRESS_BOOK_CONTACTS_KEY);
+   }
+
+   saveContactsToStore(contactsToSave: Contact[]) {
+      let parsedContactsToSave = this.parseJsonStringIntoContactsArray(JSON.stringify(contactsToSave))
+      this.storage.set(this.UB_ADDRESS_BOOK_CONTACTS_KEY, parsedContactsToSave);
    }
 
    //TODO: comment out this check for production release

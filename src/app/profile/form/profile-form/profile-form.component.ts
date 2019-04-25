@@ -17,19 +17,19 @@ export class ProfileFormComponent implements OnInit {
    constructor(private profileService: ProfileService, private debugService: DebugService, public toastController: ToastController) { }
 
    // this is called by the parent profile page each time the view becomes active
-   getPersonalProfile() {
+   async getPersonalProfile() {
       this.debugService.add("ProfileFormComponent.getPersonalProfile: getting personal profile from store.");
 
-      this.profileService.getPersonalProfile().then(profileResponse => {
-         if (profileResponse != null && profileResponse != undefined && profileResponse != '') {
-            this.profile = profileResponse;
-            this.debugService.add("ProfileFormComponent: personal profile from UB store.");
-            this.debugService.add(JSON.stringify(this.profile));
-         } else {
-            this.debugService.add("ProfileFormComponent.ngOnInit: profile is empty.");
-         }
-      });
+      const profileResponse = await this.profileService.getPersonalProfile();
+      if (profileResponse != null && profileResponse != undefined && profileResponse != '') {
+         this.profile = profileResponse;
+         this.debugService.add("ProfileFormComponent: personal profile from UB store.");
+         this.debugService.add(JSON.stringify(this.profile));
+      } else {
+         this.debugService.add("ProfileFormComponent.ngOnInit: profile is empty.");
+      }
    }
+
    onSubmit() {
       this.debugService.add("ProfileFormComponent.onSubmit: Submitted, Saved personal profile.");
       this.debugService.add(JSON.stringify(this.profile));

@@ -5,11 +5,7 @@ import { DebugService } from '../debug/debug.service';
 import { ModalController } from '@ionic/angular';
 import { ContactUpdatePage } from '../contacts/contact-update/contact-update.page';
 import { ContactsService } from '../contacts/contacts.service';
-import { Contact } from '@ionic-native/contacts/ngx';
-
-// TODO: 
-// - LOW Priority: consider having a "manual override" option incase we can't find the contact.  Allows user to select which contact to update.
-//    This could happen in the event of a name and phone number change at the same time.
+import { DeltasService } from '../contacts/deltas/deltas.service';
 
 // DEBUG:
 // generate base64 hash of contact object with updates:
@@ -24,8 +20,8 @@ import { Contact } from '@ionic-native/contacts/ngx';
 export class DeeplinkService {
 
    constructor(protected deeplinks: Deeplinks, protected navController: NavController, private zone: NgZone,
-      private debugService: DebugService, private modalController: ModalController, private contactsService: ContactsService, 
-      public toastController: ToastController) { }
+      private debugService: DebugService, private modalController: ModalController, private contactsService: ContactsService,
+      public toastController: ToastController, private deltaService: DeltasService) { }
 
    setupDeepLinkRouting() {
       this.deeplinks.route({
@@ -40,48 +36,35 @@ export class DeeplinkService {
    // match.$route - the route we matched, which is the matched entry from the arguments to route()
    // match.$args - the args passed in the link
    // match.$link - the full link data
-   contactUpdateIntentMatch(match) {
+   async contactUpdateIntentMatch(match) {
       this.debugService.add("DeeplinkService.setupDeepLinkRouting: Successfully matched route:");
       this.debugService.add(match);
 
       // parse raw query string into update object
       var contactUpdates = this.parseContactQueryString(match.$link.queryString);
 
-      this.contactsService.buildContactWithUpdates(contactUpdates).then((contactWithUpdatesAndDeltas) => {
-         console.log(contactWithUpdatesAndDeltas)
+      const contactWithUpdatesAndDeltas = await this.deltaService.buildContactWithDeltasAndUpdates(contactUpdates);
+      console.log(contactWithUpdatesAndDeltas);
 
-         this.modalController.create({
-            component: ContactUpdatePage,
-            componentProps: contactWithUpdatesAndDeltas
-         }).then((modal) => {
-            modal.present();
-            this.debugService.add("DeeplinkService.setupDeepLinkRouting: Successfully navigated to route.");
+      this.modalController.create({
+         component: ContactUpdatePage,
+         componentProps: contactWithUpdatesAndDeltas
+      }).then((modal) => {
+         modal.present();
+         this.debugService.add("DeeplinkService.setupDeepLinkRouting: Successfully navigated to route.");
 
-            modal.onDidDismiss().then(data => {
-               if (data.data.save === true) {
-                  this.presentToast('Saving contact updates, please wait...', 'secondary');
-                  this.contactsService.updateContact(contactUpdates).then((updatedContact) => {
-                     if (updatedContact == undefined) {
-                        this.presentToast('Failed to save contact updates, manually update', 'danger');
-                     } else {
-                        this.presentToast('Successfully saved updates!', 'success');
-                     }
-                  });
-               }
-            });
+         modal.onDidDismiss().then(data => {
+            if (data.data.save === true) {
+               this.presentToast('Saving contact updates, please wait...', 'secondary');
+               this.contactsService.updateContact(contactUpdates).then((updatedContact) => {
+                  if (updatedContact == undefined) {
+                     this.presentToast('Failed to save contact updates, manually update', 'danger');
+                  } else {
+                     this.presentToast('Successfully saved updates!', 'success');
+                  }
+               });
+            }
          });
-      });
-   }
-
-   getContactFromDevice(displayName): Promise<Contact> {
-      return this.contactsService.findContactByName(displayName).then(contactFound => {
-         this.debugService.add("DeeplinkService.getContactFromDevice: Contact found");
-         return contactFound;
-      }, (error: any) => {
-         //TODO: handle known error cases like denied permissions.
-         this.debugService.add("DeeplinkService.getContactFromDevice: Error finding contacts.");
-         this.debugService.add(error);
-         return Promise.resolve(undefined);
       });
    }
 

@@ -12,16 +12,26 @@ export class ContactUpdatePage implements OnInit {
    contactDeltas;
    updateNeeded;
    displayName;
+   contact: any;
 
    constructor(private modalController: ModalController, private navParams: NavParams) {
       //TODO: null checks
       this.updateNeeded = navParams.data.updateNeeded;
-
+      this.contact = {};
       if (navParams.data._objectInstance.name) {
          this.displayName = navParams.data._objectInstance.name.givenName + ' ' + navParams.data._objectInstance.name.familyName;
+      } else if (navParams.data._objectInstance.displayName) {
+         this.displayName = navParams.data._objectInstance.displayName;
       } else {
          this.displayName = "[missing name]"
       }
+
+      this.contact = {
+         name: this.displayName,
+         phoneNumbers: navParams.data._objectInstance.phoneNumbers,
+         emails: navParams.data._objectInstance.emails,         
+         address: navParams.data._objectInstance.addresses
+      };
 
       if (this.updateNeeded === true) {
          this.contactDeltas = navParams.data.deltas;

@@ -102,8 +102,9 @@ export class Tab2Page {
       return this.allContacts.filter(contact => contact.inNetwork).length;
    }
 
-   private checkIsUBNetworkDatabaseCreated() {
-      this.networkStoreService.getUBDatabaseOfContacts(successResults => {
+   private async checkIsUBNetworkDatabaseCreated() {
+      try {
+         const successResults = await this.networkStoreService.getUBDatabaseOfContacts();
          if (successResults == null || successResults == undefined) {
             this.debugService.add("Tab2Page.checkIsUBNetworkDatabaseCreated: UB Addressbook to be created.");
             this.networkStoreService.getAllAddressbookContactsFromDevice().then(deviceContacts => {
@@ -123,7 +124,10 @@ export class Tab2Page {
 
             this.checkForMaximumSelectedNetworkContacts(true);
          }
-      }, errorResults => console.log(errorResults));
+      }
+      catch (error) {
+         return Promise.reject(undefined);
+      }
    }
 
    loadMoreContacts(infiniteScrollParam?) {
@@ -137,15 +141,14 @@ export class Tab2Page {
    loadContacts(subjectContactData, infiniteScrollParam?) {
       let startIndex = this.currentPage * this.CONTACTS_PER_PAGE;
       let endIndex = startIndex + this.CONTACTS_PER_PAGE;
-      // console.log(startIndex);
-      // console.log(endIndex);
+      
       this.displayedContacts = this.displayedContacts.concat(
          subjectContactData.slice(startIndex, endIndex));
 
       if (infiniteScrollParam) {
          infiniteScrollParam.target.complete();
       }
-      
+
       if (this.currentPage === (this.pageCount - 1)) {
          if (this.infiniteScroll) {
             this.infiniteScroll.disabled = true;
@@ -160,13 +163,8 @@ export class Tab2Page {
 
    private initContactsTable(rawData) {
       let deviceContactsLength = rawData.length;
-      //console.log(deviceContactsLength);
-
       let rawPageCount = deviceContactsLength / this.CONTACTS_PER_PAGE;
-      //console.log("rawPageCount: " + rawPageCount);
-
       this.pageCount = Math.ceil(rawPageCount);
-      //console.log("pageCount: " + this.pageCount);
    }
 
    sortData(array: Array<Contact>): Array<Contact> {
@@ -194,16 +192,13 @@ export class Tab2Page {
 
    sendProfileToNetwork() {
       this.sending = true;
-      this.profileService.sendProfileToNetwork((success?) => {
+
+      this.profileService.sendProfileToNetwork(() => {
          this.sending = false;
          this.presentToast('Profile Successfully Sent to Network!', 'success');
-      }, (error?) => {
+      }, () => {
          this.sending = false;
-         if (error) {
-            this.presentToast(error, 'danger');
-         } else {
-            this.presentToast('Send failed, try back later', 'danger');
-         }
+         this.presentToast('Send failed, try back later', 'danger');
       });
    }
 }

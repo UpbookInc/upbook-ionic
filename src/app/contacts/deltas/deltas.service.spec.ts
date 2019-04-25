@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 
-import { TextMessageService } from './text-message.service';
+import { DeltasService } from './deltas.service';
 
-describe('TextMessageService', () => {
+describe('DeltasService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: TextMessageService = TestBed.get(TextMessageService);
+    const service: DeltasService = TestBed.get(DeltasService);
     expect(service).toBeTruthy();
   });
 });

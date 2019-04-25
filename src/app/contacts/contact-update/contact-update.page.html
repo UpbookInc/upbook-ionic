@@ -47,6 +47,26 @@
       </ion-card-content>
    </ion-card>
 
+   <ion-card>
+      <ion-card-header>
+         <ion-card-subtitle>All Contact Information</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+         <ion-label>Phone Numbers</ion-label>
+         <ion-list>
+            <ion-item *ngFor="let phNum of contact.phoneNumbers">
+               {{phNum.value}}
+            </ion-item>
+         </ion-list>
+         <ion-label>Emails</ion-label>
+         <ion-list>
+            <ion-item *ngFor="let email of contact.emails">
+               {{email.value}}
+            </ion-item>
+         </ion-list>
+      </ion-card-content>
+   </ion-card>
+
    <ion-card *ngIf="updateNeeded === true">
       <ion-card-content>
          <ion-button (click)="cancel()" color="primary">Cancel</ion-button>
