@@ -17,50 +17,76 @@
             No updates to perform
          </ion-card-subtitle>
       </ion-card-header>
-      <ion-card-header>
+      <ion-card-header *ngIf="updateNeeded === true">
          <ion-card-subtitle color="primary">Contact Changes</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
          <ion-list>
-            <ion-item *ngFor="let phNumAdded of contactDeltas.addedPhoneNumbers">
+            <ion-item *ngFor="let phNumAdded of contactDeltas?.addedPhoneNumbers">
                <ion-icon name="add" color="success"></ion-icon> {{phNumAdded.value}}
             </ion-item>
-            <ion-item *ngFor="let addedEmail of contactDeltas.addedEmails">
+            <ion-item *ngFor="let addedEmail of contactDeltas?.addedEmails">
                <ion-icon name="add" color="success"></ion-icon> {{addedEmail.value}}
             </ion-item>
+            <ion-item *ngFor="let addedAddr of contactDeltas?.addedAddresses">
+               <ion-icon name="add" color="success"></ion-icon> {{addedAddr.streetAddress}}
+            </ion-item>
+            <ion-item *ngFor="let addedOrg of contactDeltas?.addedOrgs">
+               <ion-icon name="add" color="success"></ion-icon> {{addedOrg.name}}
+            </ion-item>
          </ion-list>
          <ion-list>
-            <ion-item *ngFor="let phNumRemoved of contactDeltas.phoneNumbersRemoved">
+            <ion-item *ngFor="let phNumRemoved of contactDeltas?.phoneNumbersRemoved">
                <ion-icon name="remove" color="danger"></ion-icon> {{phNumRemoved.value}}
             </ion-item>
-            <ion-item *ngFor="let removedEmail of contactDeltas.emailsRemoved">
+            <ion-item *ngFor="let removedEmail of contactDeltas?.emailsRemoved">
                <ion-icon name="remove" color="danger"></ion-icon> {{removedEmail.value}}
             </ion-item>
-         </ion-list>
-      </ion-card-content>
-   </ion-card>
-
-   <!-- TODO: finish displaying all contact info here -->
-   <ion-card>
-      <ion-card-header>
-         <ion-card-subtitle>All Contact Information</ion-card-subtitle>
-      </ion-card-header>
-      <ion-card-content>
-         <ion-list>
-            <ion-item>
-               <ion-input *ngFor="let phNum of contact.phoneNumbers" value="{{phNum.value}}" readonly><br /></ion-input>
+            <ion-item *ngFor="let addrRemoved of contactDeltas?.addressesRemoved">
+               <ion-icon name="remove" color="danger"></ion-icon> {{addrRemoved.streetAddress}}
             </ion-item>
-            <ion-item>
-               <ion-input *ngFor="let email of contact.emails" value="{{email.value}}" readonly><br /></ion-input>
+            <ion-item *ngFor="let removedOrg of contactDeltas?.orgsRemoved">
+               <ion-icon name="remove" color="danger"></ion-icon> {{removedOrg.name}}
             </ion-item>
          </ion-list>
       </ion-card-content>
    </ion-card>
 
    <ion-card *ngIf="updateNeeded === true">
+      <ion-card-header>
+         <ion-card-subtitle>Contact Changes Look Like</ion-card-subtitle>
+      </ion-card-header>
       <ion-card-content>
-         <ion-button (click)="cancel()" color="primary">Cancel</ion-button>
-         <ion-button (click)="save()" color="primary">Save Updates</ion-button>
+         <ion-grid>
+            <ion-row>
+               <ion-col *ngFor="let phNum of contact?.phoneNumbers" size="12">
+                  <ion-input value="{{phNum.value}}" readonly></ion-input>
+               </ion-col>
+            </ion-row>
+            <ion-row>
+               <ion-col *ngFor="let email of contact?.emails" size="12">
+                  <ion-input value="{{email.value}}" readonly></ion-input>
+               </ion-col>
+            </ion-row>
+            <ion-row>
+               <ion-col *ngFor="let addr of contact?.addresses" size="12">
+                  <ion-input value="{{addr.streetAddress}}" readonly></ion-input>
+               </ion-col>
+            </ion-row>
+            <ion-row>
+               <ion-col *ngFor="let org of contact?.organizations" size="12">
+                  <ion-input value="{{org.name}}" readonly></ion-input>
+               </ion-col>
+            </ion-row>
+         </ion-grid>
       </ion-card-content>
    </ion-card>
 </ion-content>
+<ion-footer *ngIf="updateNeeded === true">
+   <ion-toolbar>
+      <ion-buttons slot="end">
+         <ion-button (click)="cancel()" color="default">Cancel</ion-button>
+         <ion-button (click)="save()" color="success">Save Updates</ion-button>
+      </ion-buttons>
+   </ion-toolbar>
+</ion-footer>

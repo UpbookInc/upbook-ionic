@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Contact, Contacts, ContactField } from '@ionic-native/contacts/ngx';
+import { Contact, Contacts, ContactField, ContactOrganization, ContactAddress } from '@ionic-native/contacts/ngx';
 import { DebugService } from '../debug/debug.service';
 import { Platform } from '@ionic/angular';
 
@@ -40,16 +40,22 @@ export class ContactsService {
             //TODO: pull this save out into its own method so we can chain these save requests together 
             contactToUpdate.phoneNumbers = [];
             contactToUpdate.emails = [];
+            contactToUpdate.addresses = [];
+            contactToUpdate.organizations = [];
 
             if (this.currentPlatform === 'ios') {
                contactToUpdate.phoneNumbers = this.updateContactPhoneNumbers(contactWithUpdates);
                contactToUpdate.emails = this.updateContactEmails(contactWithUpdates);
+               contactToUpdate.addresses = this.updateContactAddresses(contactWithUpdates);
+               contactToUpdate.organizations = this.updateContactOrganizations(contactWithUpdates);
                return this.saveChangesToContact(contactToUpdate);
             }
             else if (this.currentPlatform === 'android') {
                return this.prepareContactForUpdatesForAndroid(contactToUpdate).then((preparedContact) => {
                   preparedContact.phoneNumbers = this.updateContactPhoneNumbers(contactWithUpdates);
                   preparedContact.emails = this.updateContactEmails(contactWithUpdates);
+                  preparedContact.addresses = this.updateContactAddresses(contactWithUpdates);
+                  preparedContact.organizations = this.updateContactOrganizations(contactWithUpdates);
                   return this.saveChangesToContact(preparedContact);
                });
             }
@@ -65,11 +71,11 @@ export class ContactsService {
    updateContactPhoneNumbers(contactWithUpdates) {
       var contactNumUpdates = [];
 
-      contactWithUpdates.phoneNumbers.map(numToAdd => {
+      contactWithUpdates.phoneNumbers.map((numToAdd, index) => {
          if (this.currentPlatform === 'ios') {
             //TODO: this needs to have the id of the specific phone number array to work.  Otherwise, it will
             //just add a new number
-            contactNumUpdates.push({ id: 0, value: numToAdd.value });
+            contactNumUpdates.push({ id: index, value: numToAdd.value });
          } else if (this.currentPlatform === 'android') {
             contactNumUpdates.push(new ContactField('', numToAdd.value, false));
          }
@@ -79,16 +85,44 @@ export class ContactsService {
 
    updateContactEmails(contactWithUpdates) {
       var contactEmailUpdates = [];
-      contactWithUpdates.emails.map(emailToAdd => {
+      contactWithUpdates.emails.map((emailToAdd, index) => {
          if (this.currentPlatform === 'ios') {
             //TODO: this needs to have the id of the specific phone number array to work.  Otherwise, it will
             //just add a new number
-            contactEmailUpdates.push({ id: 0, value: emailToAdd.value });
+            contactEmailUpdates.push({ id: index, value: emailToAdd.value });
          } else if (this.currentPlatform === 'android') {
             contactEmailUpdates.push(new ContactField('', emailToAdd.value, false));
          }
       });
       return contactEmailUpdates;
+   }
+
+   updateContactAddresses(contactWithUpdates) {
+      var contactAddrUpdates = [];
+      contactWithUpdates.addresses.map((addrToAdd, index) => {
+         if (this.currentPlatform === 'ios') {
+            //TODO: this needs to have the id of the specific phone number array to work.  Otherwise, it will
+            //just add a new number
+            contactAddrUpdates.push({ id: index, streetAddress: addrToAdd.streetAddress });
+         } else if (this.currentPlatform === 'android') {
+            contactAddrUpdates.push(new ContactAddress(false, '', addrToAdd.streetAddress, addrToAdd.streetAddress));
+         }
+      });
+      return contactAddrUpdates;
+   }
+
+   updateContactOrganizations(contactWithUpdates) {
+      var contactOrgUpdates = [];
+      contactWithUpdates.organizations.map((orgToAdd, index) => {
+         if (this.currentPlatform === 'ios') {
+            //TODO: this needs to have the id of the specific phone number array to work.  Otherwise, it will
+            //just add a new number
+            contactOrgUpdates.push({ id: index, name: orgToAdd.name });
+         } else if (this.currentPlatform === 'android') {
+            contactOrgUpdates.push(new ContactOrganization('', orgToAdd.name));
+         }
+      });
+      return contactOrgUpdates;
    }
 
    async prepareContactForUpdatesForAndroid(contactToUpdate): Promise<any> {
@@ -157,10 +191,10 @@ export class ContactsService {
       });
    }
 
-   trimContactFieldItems(itemsToNormalize: Array<any>) {
+   trimContactFieldItems(itemsToNormalize: Array<any>, baseFieldName: string = 'value') {
       return itemsToNormalize.map(itemStr => {
-         if (itemStr.value != null && itemStr != undefined) {
-            itemStr.value = itemStr.value.trim()
+         if (itemStr[baseFieldName] != null && itemStr != undefined) {
+            itemStr[baseFieldName] = itemStr[baseFieldName].trim()
          }
          return itemStr;
       });

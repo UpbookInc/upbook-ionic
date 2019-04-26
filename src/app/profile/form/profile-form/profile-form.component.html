@@ -18,68 +18,96 @@
                </ion-text>
             </ion-item>
 
-            <ion-item-divider [hidden]="!editMode">
+            <ion-item-divider>
                <ion-label>Phone Numbers</ion-label>
-               <ion-button fill="clear" slot="end" (click)="addNewItem('phoneNumbers')">
+               <ion-button fill="clear" slot="end" [hidden]="!editMode" (click)="addNewItem('phoneNumbers')">
                   <ion-icon name="add-circle-outline"></ion-icon>
                </ion-button>
             </ion-item-divider>
             <ion-list *ngIf="profile.phoneNumbers && profile.phoneNumbers.length > 0">
-               <ion-item *ngFor="let phNum of profile.phoneNumbers; index as i; trackBy:trackByFn">
-                  <ion-input value="{{phNum.value}}" id="phone{{i}}" name="phone{{i}}" placeholder="enter number"
-                     [(ngModel)]="phNum.value" type="string" [readonly]="!editMode" #phoneInput="ngModel"></ion-input>
-                  <ion-button fill="clear" slot="end" [hidden]="!editMode" (click)="removeItemFromArray(phNum, profile.phoneNumbers)">
-                     <ion-icon color="danger" name="remove-circle"></ion-icon>
-                  </ion-button>
-               </ion-item>
+               <ion-item-sliding id="phslide{{i}}" [disabled]="!editMode"
+                  *ngFor="let phNum of profile.phoneNumbers; index as i; trackBy:trackByFn" #phSlide>
+                  <ion-item>
+                     <ion-input value="{{phNum.value}}" id="phone{{i}}" name="phone{{i}}" placeholder="enter number"
+                        [(ngModel)]="phNum.value" type="string" [readonly]="!editMode" #phoneInput="ngModel">
+                     </ion-input>
+                  </ion-item>
+                  <ion-item-options side="end" [hidden]="!editMode">
+                     <ion-item-option color="danger" [disabled]="!editMode"
+                        (click)="phSlide.closeOpened(); removeItemFromArray(phNum, profile.phoneNumbers)">
+                        <ion-icon slot="icon-only" color="light" name="trash"></ion-icon>
+                     </ion-item-option>
+                  </ion-item-options>
+               </ion-item-sliding>
             </ion-list>
 
-            <ion-item-divider [hidden]="!editMode">
+            <ion-item-divider>
                <ion-label>Emails</ion-label>
-               <ion-button fill="clear" slot="end" (click)="addNewItem('emails')">
+               <ion-button fill="clear" slot="end" [hidden]="!editMode" (click)="addNewItem('emails')">
                   <ion-icon name="add-circle-outline"></ion-icon>
                </ion-button>
             </ion-item-divider>
             <ion-list *ngIf="profile.emails && profile.emails.length > 0">
-               <ion-item *ngFor="let email of profile.emails; index as i; trackBy:trackByFn">
-                  <ion-input value="{{email.value}}" id="email{{i}}" name="email{{i}}" placeholder="enter email"
-                     [(ngModel)]="email.value" type="email" email [readonly]="!editMode" #emailInput="ngModel"></ion-input>
-                  <ion-button fill="clear" slot="end" [hidden]="!editMode" (click)="removeItemFromArray(email, profile.emails)">
-                     <ion-icon color="danger" name="remove-circle"></ion-icon>
-                  </ion-button>
-               </ion-item>
+               <ion-item-sliding id="emailslide{{i}}" [disabled]="!editMode"
+                  *ngFor="let email of profile.emails; index as i; trackBy:trackByFn" #emailSlide>
+                  <ion-item>
+                     <ion-input value="{{email.value}}" id="email{{i}}" name="email{{i}}" placeholder="enter email"
+                        [(ngModel)]="email.value" type="email" email [readonly]="!editMode" #emailInput="ngModel">
+                     </ion-input>
+                  </ion-item>
+                  <ion-item-options side="end" [hidden]="!editMode">
+                     <ion-item-option color="danger" [disabled]="!editMode"
+                        (click)="emailSlide.closeOpened(); removeItemFromArray(email, profile.emails)">
+                        <ion-icon slot="icon-only" color="light" name="trash"></ion-icon>
+                     </ion-item-option>
+                  </ion-item-options>
+               </ion-item-sliding>
             </ion-list>
 
-            <ion-item-divider [hidden]="!editMode">
+            <ion-item-divider>
                <ion-label>Addresses</ion-label>
-               <ion-button fill="clear" slot="end" (click)="addNewItem('addresses')">
+               <ion-button fill="clear" slot="end" [hidden]="!editMode" (click)="addNewItem('addresses', 'streetAddress')">
                   <ion-icon name="add-circle-outline"></ion-icon>
                </ion-button>
             </ion-item-divider>
             <ion-list *ngIf="profile.addresses && profile.addresses.length > 0">
-               <ion-item *ngFor="let address of profile.addresses; index as i; trackBy:trackByFn">
-                  <ion-input value="{{address.value}}" id="address{{i}}" name="address{{i}}" placeholder="enter address"
-                     [(ngModel)]="address.value" type="string" [readonly]="!editMode" #addressInput="ngModel"></ion-input>
-                  <ion-button fill="clear" slot="end" [hidden]="!editMode" (click)="removeItemFromArray(address, profile.addresses)">
-                     <ion-icon color="danger" name="remove-circle"></ion-icon>
-                  </ion-button>
-               </ion-item>
+               <ion-item-sliding id="addrslide{{i}}" [disabled]="!editMode"
+                  *ngFor="let address of profile.addresses; index as i; trackBy:trackByFn" #addrslide>
+                  <ion-item>
+                     <ion-input value="{{address.streetAddress}}" id="address{{i}}" name="address{{i}}"
+                        placeholder="enter address" [(ngModel)]="address.streetAddress" type="string" [readonly]="!editMode"
+                        #addressInput="ngModel">
+                     </ion-input>
+                  </ion-item>
+                  <ion-item-options side="end" [hidden]="!editMode">
+                     <ion-item-option color="danger" [disabled]="!editMode"
+                        (click)="addrslide.closeOpened(); removeItemFromArray(address, profile.addresses)">
+                        <ion-icon slot="icon-only" color="light" name="trash"></ion-icon>
+                     </ion-item-option>
+                  </ion-item-options>
+               </ion-item-sliding>
             </ion-list>
 
-            <ion-item-divider [hidden]="!editMode">
+            <ion-item-divider>
                <ion-label>Organizations</ion-label>
-               <ion-button fill="clear" slot="end" (click)="addNewItem('organizations')">
+               <ion-button fill="clear" slot="end" [hidden]="!editMode" (click)="addNewItem('organizations', 'name')">
                   <ion-icon name="add-circle-outline"></ion-icon>
                </ion-button>
             </ion-item-divider>
             <ion-list *ngIf="profile.organizations && profile.organizations.length > 0">
-               <ion-item *ngFor="let org of profile.organizations; index as i; trackBy:trackByFn">
-                  <ion-input value="{{org.value}}" id="org{{i}}" name="org{{i}}" placeholder="enter organization"
-                     [(ngModel)]="org.value" type="string" [readonly]="!editMode" #orgInput="ngModel"></ion-input>
-                  <ion-button fill="clear" slot="end" [hidden]="!editMode" (click)="removeItemFromArray(org, profile.organizations)">
-                     <ion-icon color="danger" name="remove-circle"></ion-icon>
-                  </ion-button>
-               </ion-item>
+               <ion-item-sliding id="orgslide{{i}}" [disabled]="!editMode"
+                  *ngFor="let org of profile.organizations; index as i; trackBy:trackByFn" #orgslide>
+                  <ion-item>
+                     <ion-input value="{{org.name}}" id="org{{i}}" name="org{{i}}" placeholder="enter organization"
+                        [(ngModel)]="org.name" type="string" [readonly]="!editMode" #orgInput="ngModel"></ion-input>
+                  </ion-item>
+                  <ion-item-options side="end" [hidden]="!editMode">
+                     <ion-item-option color="danger" [disabled]="!editMode"
+                        (click)="orgslide.closeOpened(); removeItemFromArray(org, profile.organizations)">
+                        <ion-icon slot="icon-only" color="light" name="trash"></ion-icon>
+                     </ion-item-option>
+                  </ion-item-options>
+               </ion-item-sliding>
             </ion-list>
          </ion-item-group>
 

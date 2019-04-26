@@ -30,7 +30,8 @@ export class ContactUpdatePage {
          name: this.displayName,
          phoneNumbers: navParams.data._objectInstance.phoneNumbers,
          emails: navParams.data._objectInstance.emails,         
-         address: navParams.data._objectInstance.addresses
+         addresses: navParams.data._objectInstance.addresses,
+         organizations: navParams.data._objectInstance.organizations
       };
 
       if (this.updateNeeded === true) {

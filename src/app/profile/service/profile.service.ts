@@ -102,7 +102,8 @@ export class ProfileService {
       var profileContact = {
          phoneNumbers: personalProfile.phoneNumbers,
          emails: personalProfile.emails,
-         address: personalProfile.addresses,
+         addresses: personalProfile.addresses,
+         organizations: personalProfile.organizations, 
          displayName: personalProfile.displayName,
          name: {
             familyName: personalProfile.firstName,

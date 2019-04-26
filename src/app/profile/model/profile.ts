@@ -1,4 +1,7 @@
-import { ContactField } from '@ionic-native/contacts/ngx';
+import { ContactField, ContactOrganization, ContactAddress } from '@ionic-native/contacts/ngx';
+
+export const baseAddrName = 'streetAddress';
+export const baseOrgName = 'name';
 
 export class Profile {
 
@@ -8,7 +11,9 @@ export class Profile {
       public displayName?: string,
       public phoneNumbers?: ContactField[],
       public emails?: ContactField[],
-      public addresses?: ContactField[],
-      public organizations?: ContactField[]) {
+      public addresses?: ContactAddress[],
+      public organizations?: ContactOrganization[]) {
    }
+
+   
 }

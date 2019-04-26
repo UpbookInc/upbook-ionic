@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { ProfileService } from '../../service/profile.service';
-import { Profile } from '../../model/profile';
+import { Profile, baseAddrName, baseOrgName } from '../../model/profile';
 import { DebugService } from 'src/app/debug/debug.service';
 import { ToastController } from '@ionic/angular';
 import { ContactField } from '@ionic-native/contacts/ngx';
@@ -46,12 +46,12 @@ export class ProfileFormComponent {
       }
 
       if (this.profile.addresses && this.profile.addresses.length === 1
-         && (!this.profile.addresses[0].value || this.profile.addresses[0].value == '')) {
+         && (!this.profile.addresses[0].streetAddress || this.profile.addresses[0].streetAddress == '')) {
          this.profile.addresses = [];
       }
 
       if (this.profile.organizations && this.profile.organizations.length === 1
-         && (!this.profile.organizations[0].value || this.profile.organizations[0].value == '')) {
+         && (!this.profile.organizations[0].name || this.profile.organizations[0].name == '')) {
          this.profile.organizations = [];
       }
    }
@@ -71,10 +71,10 @@ export class ProfileFormComponent {
       this.presentToast('Profile Saved!', 'success');
    }
 
-   addNewItem(profileItemArrayName) {
+   addNewItem(profileItemArrayName, baseFieldName: string = 'value') {
       if (this.profile[profileItemArrayName].length >= 1) {
-         if (this.profile[profileItemArrayName][this.profile[profileItemArrayName].length - 1].value != null
-            && this.profile[profileItemArrayName][this.profile[profileItemArrayName].length - 1].value != '') {
+         if (this.profile[profileItemArrayName][this.profile[profileItemArrayName].length - 1][baseFieldName] != null
+            && this.profile[profileItemArrayName][this.profile[profileItemArrayName].length - 1][baseFieldName] != '') {
                this.profile[profileItemArrayName].push(new ContactField());
          } else {
             this.profile[profileItemArrayName][this.profile[profileItemArrayName].length - 1] = new ContactField();
@@ -88,13 +88,13 @@ export class ProfileFormComponent {
    private filterEmptyContactFields() {
       this.profile.phoneNumbers = this.clearEmptyItems(this.profile.phoneNumbers);
       this.profile.emails = this.clearEmptyItems(this.profile.emails);
-      this.profile.addresses = this.clearEmptyItems(this.profile.addresses);
-      this.profile.organizations = this.clearEmptyItems(this.profile.organizations);
+      this.profile.addresses = this.clearEmptyItems(this.profile.addresses, baseAddrName);
+      this.profile.organizations = this.clearEmptyItems(this.profile.organizations, baseOrgName);
    }
 
-   private clearEmptyItems(contactFieldsArray) {
+   private clearEmptyItems(contactFieldsArray, baseFieldName: string = 'value') {
       if (contactFieldsArray && contactFieldsArray.length >= 1) {
-         contactFieldsArray = contactFieldsArray.filter(item => item.value && item.value != '');
+         contactFieldsArray = contactFieldsArray.filter(item => item[baseFieldName] && item[baseFieldName] != '');
       }
       return contactFieldsArray;
    }

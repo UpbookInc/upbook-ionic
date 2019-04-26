@@ -3,6 +3,7 @@ import { DebugService } from 'src/app/debug/debug.service';
 import { ContactsService } from '../contacts.service';
 import { Contact } from '@ionic-native/contacts/ngx';
 import * as _ from 'lodash';
+import { baseAddrName, baseOrgName } from 'src/app/profile/model/profile';
 
 @Injectable({
    providedIn: 'root'
@@ -11,41 +12,41 @@ export class DeltasService {
 
    constructor(private contactService: ContactsService, private debugService: DebugService) { }
 
-   // - finish other deltas
-   // - handle other fields
-   // contactFound.displayName;
-   // contactFound.emails;
-   // contactFound.phoneNumbers;
-   // contactFound.addresses;
    async buildContactWithDeltasAndUpdates(contactWithUpdates): Promise<Contact> {
       try {
          const contactFound = await this.contactService.findContactByName(contactWithUpdates.displayName);
          this.debugService.add("ContactsService.buildContactWithUpdates: Contact found");
-         // this.debugService.add(contactFound);
+
          if (contactFound[0]) {
             let contactToUpdate = _.cloneDeep(contactFound[0]);
             contactToUpdate.deltas = {};
 
             contactToUpdate = this.determinePhoneNumberDeltas(contactWithUpdates, contactToUpdate);
             contactToUpdate = this.determineEmailDeltas(contactWithUpdates, contactToUpdate);
-            contactToUpdate = this.determineAddressDeltas(contactWithUpdates, contactToUpdate)
-
-            //TODO: move these to own method and process deltas
-            contactToUpdate.organizations = contactWithUpdates.organizations;
+            contactToUpdate = this.determineAddressDeltas(contactWithUpdates, contactToUpdate);
+            contactToUpdate = this.determineOrgDeltas(contactWithUpdates, contactToUpdate);
 
             //determine if an update is needed
             if ((contactToUpdate.deltas.addedPhoneNumbers && contactToUpdate.deltas.addedPhoneNumbers.length > 0)
                || (contactToUpdate.deltas.phoneNumbersRemoved && contactToUpdate.deltas.phoneNumbersRemoved.length > 0)) {
                contactToUpdate.updateNeeded = true;
-            }
-            else {
+            } else if ((contactToUpdate.deltas.addedEmails && contactToUpdate.deltas.addedEmails.length > 0)
+               || (contactToUpdate.deltas.emailsRemoved && contactToUpdate.deltas.emailsRemoved.length > 0)) {
+               contactToUpdate.updateNeeded = true;
+            } else if ((contactToUpdate.deltas.addedAddresses && contactToUpdate.deltas.addedAddresses.length > 0)
+               || (contactToUpdate.deltas.addressesRemoved && contactToUpdate.deltas.addressesRemoved.length > 0)) {
+               contactToUpdate.updateNeeded = true;
+            } else if ((contactToUpdate.deltas.addedOrgs && contactToUpdate.deltas.addedOrgs.length > 0)
+               || (contactToUpdate.deltas.orgsRemoved && contactToUpdate.deltas.orgsRemoved.length > 0)) {
+               contactToUpdate.updateNeeded = true;
+            } else {
                contactToUpdate.updateNeeded = false;
             }
             return contactToUpdate;
          }
          else {
-            //TODO: contact not found on device, create new one? 
-            //For now just mimic contact object and set to update not needed
+            // TODO: contact not found on device, create new one? 
+            // For now just mimic contact object and set to update not needed
             const emptyContact = new Contact();
             emptyContact.displayName = contactWithUpdates.displayName;
             emptyContact.updateNeeded = false;
@@ -99,22 +100,40 @@ export class DeltasService {
       if (contactWithUpdates.addresses && contactWithUpdates.addresses.length > 0) {
          var addedItems = contactWithUpdates.addresses;
          if (contactToUpdate.addresses && contactToUpdate.addresses.length > 0) {
-            addedItems = this.getArrayItemsNotInSecondArray(this.contactService.trimContactFieldItems(contactWithUpdates.addresses),
-               this.contactService.trimContactFieldItems(contactToUpdate.addresses));
+            addedItems = this.getArrayItemsNotInSecondArray(this.contactService.trimContactFieldItems(contactWithUpdates.addresses, baseAddrName),
+               this.contactService.trimContactFieldItems(contactToUpdate.addresses, baseAddrName), baseAddrName);
          }
          contactToUpdate.deltas.addedAddresses = addedItems;
       }
       if (contactToUpdate.addresses && contactToUpdate.addresses.length > 0) {
-         var itemsRemoved = this.getArrayItemsNotInSecondArray(this.contactService.trimContactFieldItems(contactToUpdate.addresses),
-            this.contactService.trimContactFieldItems(contactWithUpdates.addresses));
+         var itemsRemoved = this.getArrayItemsNotInSecondArray(this.contactService.trimContactFieldItems(contactToUpdate.addresses, baseAddrName),
+            this.contactService.trimContactFieldItems(contactWithUpdates.addresses, baseAddrName), baseAddrName);
          contactToUpdate.deltas.addressesRemoved = itemsRemoved;
       }
       contactToUpdate.addresses = contactWithUpdates.addresses;
       return contactToUpdate;
    }
 
-   private getArrayItemsNotInSecondArray(firstArray, secondArray) {
+   private determineOrgDeltas(contactWithUpdates, contactToUpdate) {
+      if (contactWithUpdates.organizations && contactWithUpdates.organizations.length > 0) {
+         var addedItems = contactWithUpdates.organizations;
+         if (contactToUpdate.organizations && contactToUpdate.organizations.length > 0) {
+            addedItems = this.getArrayItemsNotInSecondArray(this.contactService.trimContactFieldItems(contactWithUpdates.organizations, baseOrgName),
+               this.contactService.trimContactFieldItems(contactToUpdate.organizations, baseOrgName), baseOrgName);
+         }
+         contactToUpdate.deltas.addedOrgs = addedItems;
+      }
+      if (contactToUpdate.organizations && contactToUpdate.organizations.length > 0) {
+         var itemsRemoved = this.getArrayItemsNotInSecondArray(this.contactService.trimContactFieldItems(contactToUpdate.organizations, baseOrgName),
+            this.contactService.trimContactFieldItems(contactWithUpdates.organizations, baseOrgName), baseOrgName);
+         contactToUpdate.deltas.orgsRemoved = itemsRemoved;
+      }
+      contactToUpdate.organizations = contactWithUpdates.organizations;
+      return contactToUpdate;
+   }
+
+   private getArrayItemsNotInSecondArray(firstArray, secondArray, fieldCheckName: string = 'value') {
       return firstArray.filter(firstArrayItem =>
-         secondArray.map(secondArrayItem => secondArrayItem.value).indexOf(firstArrayItem.value) === -1)
+         secondArray.map(secondArrayItem => secondArrayItem[fieldCheckName]).indexOf(firstArrayItem[fieldCheckName]) === -1)
    }
 }
