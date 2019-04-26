@@ -41,6 +41,7 @@ export class ProfilePage {
       if (result == null || result == undefined || result == '') {
          this.debugService.add("ProfilePage.checkIsProfileSavedToUBDatabase UB profile to be created");
          this.profileComplete = false;
+         this.editMode = true;
       } else {
          //TODO: check for all required fields to be complete
          this.debugService.add("ProfilePage.checkIsProfileSavedToUBDatabase UB profile already exists");
