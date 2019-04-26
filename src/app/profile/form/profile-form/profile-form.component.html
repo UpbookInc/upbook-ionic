@@ -1,25 +1,26 @@
-<!-- first name, last name, phone number, email, personal address, organization -->
 <ion-card>
    <ion-card-content>
       <form (ngSubmit)="onSubmit()" #profileForm="ngForm" *ngIf="profile">
          <ion-item-group>
-            <ion-item>
-               <ion-input id="firstName" name="firstName" placeholder="First Name" [(ngModel)]="profile.firstName"
-                  type="text" [readonly]="!editMode" required #firstName="ngModel"></ion-input>
-               <ion-text [hidden]="firstName.valid || firstName.pristine" color="danger">
-                  First Name is required
-               </ion-text>
-            </ion-item>
-            <ion-item>
-               <ion-input id="lastName" name="lastName" placeholder="Last Name" [(ngModel)]="profile.lastName"
-                  type="text" [readonly]="!editMode" required #lastName="ngModel"></ion-input>
-               <ion-text [hidden]="lastName.valid || lastName.pristine" color="danger">
-                  Last Name is required
-               </ion-text>
-            </ion-item>
+            <ion-list>
+               <ion-item>
+                  <ion-input id="firstName" name="firstName" placeholder="First Name" [(ngModel)]="profile.firstName"
+                     type="text" [readonly]="!editMode" required #firstName="ngModel"></ion-input>
+                  <ion-text [hidden]="firstName.valid || firstName.pristine" color="danger">
+                     First Name is required
+                  </ion-text>
+               </ion-item>
+               <ion-item>
+                  <ion-input id="lastName" name="lastName" placeholder="Last Name" [(ngModel)]="profile.lastName"
+                     type="text" [readonly]="!editMode" required #lastName="ngModel"></ion-input>
+                  <ion-text [hidden]="lastName.valid || lastName.pristine" color="danger">
+                     Last Name is required
+                  </ion-text>
+               </ion-item>
+            </ion-list>
 
             <ion-item-divider>
-               <ion-label>Phone Numbers</ion-label>
+               <ion-label class="profile-item-divider-label">Phone Numbers</ion-label>
                <ion-button fill="clear" slot="end" [hidden]="!editMode" (click)="addNewItem('phoneNumbers')">
                   <ion-icon name="add-circle-outline"></ion-icon>
                </ion-button>
@@ -42,7 +43,7 @@
             </ion-list>
 
             <ion-item-divider>
-               <ion-label>Emails</ion-label>
+               <ion-label class="profile-item-divider-label">Emails</ion-label>
                <ion-button fill="clear" slot="end" [hidden]="!editMode" (click)="addNewItem('emails')">
                   <ion-icon name="add-circle-outline"></ion-icon>
                </ion-button>
@@ -65,8 +66,9 @@
             </ion-list>
 
             <ion-item-divider>
-               <ion-label>Addresses</ion-label>
-               <ion-button fill="clear" slot="end" [hidden]="!editMode" (click)="addNewItem('addresses', 'streetAddress')">
+               <ion-label class="profile-item-divider-label">Addresses</ion-label>
+               <ion-button fill="clear" slot="end" [hidden]="!editMode"
+                  (click)="addNewItem('addresses', 'streetAddress')">
                   <ion-icon name="add-circle-outline"></ion-icon>
                </ion-button>
             </ion-item-divider>
@@ -75,8 +77,8 @@
                   *ngFor="let address of profile.addresses; index as i; trackBy:trackByFn" #addrslide>
                   <ion-item>
                      <ion-input value="{{address.streetAddress}}" id="address{{i}}" name="address{{i}}"
-                        placeholder="enter address" [(ngModel)]="address.streetAddress" type="string" [readonly]="!editMode"
-                        #addressInput="ngModel">
+                        placeholder="enter address" [(ngModel)]="address.streetAddress" type="string"
+                        [readonly]="!editMode" #addressInput="ngModel">
                      </ion-input>
                   </ion-item>
                   <ion-item-options side="end" [hidden]="!editMode">
@@ -89,7 +91,7 @@
             </ion-list>
 
             <ion-item-divider>
-               <ion-label>Organizations</ion-label>
+               <ion-label class="profile-item-divider-label">Organizations</ion-label>
                <ion-button fill="clear" slot="end" [hidden]="!editMode" (click)="addNewItem('organizations', 'name')">
                   <ion-icon name="add-circle-outline"></ion-icon>
                </ion-button>
