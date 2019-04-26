@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { ModalController, NavParams } from '@ionic/angular';
 
 @Component({
@@ -6,7 +6,7 @@ import { ModalController, NavParams } from '@ionic/angular';
    templateUrl: './contact-update.page.html',
    styleUrls: ['./contact-update.page.scss'],
 })
-export class ContactUpdatePage implements OnInit {
+export class ContactUpdatePage {
 
    contactUpdates;
    contactDeltas;
@@ -37,10 +37,6 @@ export class ContactUpdatePage implements OnInit {
          this.contactDeltas = navParams.data.deltas;
          this.contactUpdates = navParams.data._objectInstance;
       }
-   }
-
-   ngOnInit() {
-      console.log('on init page1page');
    }
 
    onBack(): void {

@@ -40,12 +40,16 @@ export class ProfileService {
          // get selected network contacts' phoneNumbers from device's contact list 
          var contactsFromDeviceInNetwork = inNetworkContacts.map(inNetworkContact => {
             return deviceContacts.find(deviceContact => {
+               if (!deviceContact.name || !inNetworkContact.name) {
+                  return false;
+               }
                return deviceContact.name.givenName === inNetworkContact.name.givenName &&
                   deviceContact.name.familyName === inNetworkContact.name.familyName;
             });
          });
 
-         //TODO: eventually may need to select main or preferred number
+         // NOTE: just grabs the in-network contact's first number to use for sending message.
+         // TODO: eventually may need to select main or preferred number
          var inNetworkContactNumbers = contactsFromDeviceInNetwork.map(contactFromDeviceinNetwork => {
             return contactFromDeviceinNetwork.phoneNumbers[0].value;
          });
@@ -94,13 +98,12 @@ export class ProfileService {
       this.storage.set(this.UB_PROFILE_KEY, profileToSave);
    }
 
-   //TODO: consider eventually storing profile in Contact format
    private convertPersonalProfileToContact(personalProfile): any {
       var profileContact = {
-         phoneNumbers: [{ value: personalProfile.primaryNumber }],
+         phoneNumbers: personalProfile.phoneNumbers,
+         emails: personalProfile.emails,
+         address: personalProfile.addresses,
          displayName: personalProfile.displayName,
-         emails: [{ value: personalProfile.primaryEmail }],
-         address: personalProfile.address,
          name: {
             familyName: personalProfile.firstName,
             formatted: personalProfile.firstName + ' ' + personalProfile.lastName,

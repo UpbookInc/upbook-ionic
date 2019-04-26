@@ -35,10 +35,12 @@ export class ContactsService {
          if (contactFound != undefined && contactFound != null && contactFound.length > 0) {
             let contactToUpdate: any = _.cloneDeep(contactFound[0]);
             contactToUpdate._objectInstance.rawId = contactToUpdate.rawId;
+
             //TODO: perform checks before updating. Only update if needed.
             //TODO: pull this save out into its own method so we can chain these save requests together 
             contactToUpdate.phoneNumbers = [];
             contactToUpdate.emails = [];
+
             if (this.currentPlatform === 'ios') {
                contactToUpdate.phoneNumbers = this.updateContactPhoneNumbers(contactWithUpdates);
                contactToUpdate.emails = this.updateContactEmails(contactWithUpdates);
@@ -62,13 +64,14 @@ export class ContactsService {
 
    updateContactPhoneNumbers(contactWithUpdates) {
       var contactNumUpdates = [];
-      contactWithUpdates.phoneNumbers.map(num => {
+
+      contactWithUpdates.phoneNumbers.map(numToAdd => {
          if (this.currentPlatform === 'ios') {
             //TODO: this needs to have the id of the specific phone number array to work.  Otherwise, it will
             //just add a new number
-            contactNumUpdates.push({ id: 0, value: contactWithUpdates.phoneNumbers[0].value });
+            contactNumUpdates.push({ id: 0, value: numToAdd.value });
          } else if (this.currentPlatform === 'android') {
-            contactNumUpdates.push(new ContactField('', num.value, false));
+            contactNumUpdates.push(new ContactField('', numToAdd.value, false));
          }
       });
       return contactNumUpdates;
@@ -76,13 +79,13 @@ export class ContactsService {
 
    updateContactEmails(contactWithUpdates) {
       var contactEmailUpdates = [];
-      contactWithUpdates.emails.map(email => {
+      contactWithUpdates.emails.map(emailToAdd => {
          if (this.currentPlatform === 'ios') {
             //TODO: this needs to have the id of the specific phone number array to work.  Otherwise, it will
             //just add a new number
-            contactEmailUpdates.push({ id: 0, value: contactWithUpdates.emails[0].value });
+            contactEmailUpdates.push({ id: 0, value: emailToAdd.value });
          } else if (this.currentPlatform === 'android') {
-            contactEmailUpdates.push(new ContactField('', email.value, false));
+            contactEmailUpdates.push(new ContactField('', emailToAdd.value, false));
          }
       });
       return contactEmailUpdates;
@@ -131,24 +134,35 @@ export class ContactsService {
    }
 
    normalizePhoneNumberAsContactField(numbersToNormalize: Array<any>) {
-      return numbersToNormalize.map(nubStr => {
-         nubStr.value = nubStr.value.replace(/\D/g, '');
-         if (nubStr.value.length === 11) {
-            //remove country code 
-            nubStr.value = nubStr.value.substring(1);
+      return numbersToNormalize.map(numStr => {
+         if (numStr.value != null && numStr != undefined) {
+            numStr.value = numStr.value.replace(/\D/g, '');
+            if (numStr.value.length === 11) {
+               //remove country code 
+               numStr.value = numStr.value.substring(1);
+            }
          }
-         return nubStr;
+         return numStr;
       });
    }
 
    normalizePhoneNumberAsStringArray(numbersToNormalize: Array<string>) {
-      return numbersToNormalize.map(nubStr => {
-         nubStr = nubStr.replace(/\D/g, '');
-         if (nubStr.length === 11) {
+      return numbersToNormalize.map(numStr => {
+         numStr = numStr.replace(/\D/g, '');
+         if (numStr.length === 11) {
             //remove country code 
-            nubStr = nubStr.substring(1);
+            numStr = numStr.substring(1);
          }
-         return nubStr;
+         return numStr;
+      });
+   }
+
+   trimContactFieldItems(itemsToNormalize: Array<any>) {
+      return itemsToNormalize.map(itemStr => {
+         if (itemStr.value != null && itemStr != undefined) {
+            itemStr.value = itemStr.value.trim()
+         }
+         return itemStr;
       });
    }
 

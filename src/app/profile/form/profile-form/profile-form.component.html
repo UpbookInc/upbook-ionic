@@ -2,43 +2,87 @@
 <ion-card>
    <ion-card-content>
       <form (ngSubmit)="onSubmit()" #profileForm="ngForm" *ngIf="profile">
-         <ion-item>
-            <ion-input id="firstName" name="firstName" placeholder="First Name" [(ngModel)]="profile.firstName" type="text"
-               required #firstName="ngModel"></ion-input>
-            <ion-text [hidden]="firstName.valid || firstName.pristine" color="danger">
-               First Name is required
-            </ion-text>
-         </ion-item>
-         <ion-item>
-            <ion-input id="lastName" name="lastName" placeholder="Last Name" [(ngModel)]="profile.lastName" type="text"
-               required #lastName="ngModel"></ion-input>
-            <ion-text [hidden]="lastName.valid || lastName.pristine" color="danger">
-               Last Name is required
-            </ion-text>
-         </ion-item>
-         <ion-item>
-            <ion-input id="primaryEmail" name="primaryEmail" placeholder="Primary Email" [(ngModel)]="profile.primaryEmail"
-               type="email" required email #primaryEmail="ngModel"></ion-input>
-            <ion-text [hidden]="primaryEmail.valid || primaryEmail.pristine" color="danger">
-               Email is required
-            </ion-text>
-         </ion-item>
-         <ion-item>
-            <ion-input id="primaryPhone" name="primaryPhone" placeholder="Primary Phone" [(ngModel)]="profile.primaryNumber"
-               type="string" required #primaryPhone="ngModel"></ion-input>
-            <ion-text [hidden]="primaryPhone.valid || primaryPhone.pristine" color="danger">
-               Phone is required
-            </ion-text>
-         </ion-item>
-         <ion-item>
-               <ion-input id="address" name="address" placeholder="Address" [(ngModel)]="profile.address"
-                  type="string" required #address="ngModel"></ion-input>
-               <ion-text [hidden]="address.valid || address.pristine" color="danger">
-                  Address is required
+         <ion-item-group>
+            <ion-item>
+               <ion-input id="firstName" name="firstName" placeholder="First Name" [(ngModel)]="profile.firstName"
+                  type="text" [readonly]="!editMode" required #firstName="ngModel"></ion-input>
+               <ion-text [hidden]="firstName.valid || firstName.pristine" color="danger">
+                  First Name is required
                </ion-text>
             </ion-item>
-         <ion-button [disabled]="!profileForm.form.valid" color="primary" type="submit">Save</ion-button>
-         <!-- TODO: consider showing button to "auto-text" all in-network members of your update -->
+            <ion-item>
+               <ion-input id="lastName" name="lastName" placeholder="Last Name" [(ngModel)]="profile.lastName"
+                  type="text" [readonly]="!editMode" required #lastName="ngModel"></ion-input>
+               <ion-text [hidden]="lastName.valid || lastName.pristine" color="danger">
+                  Last Name is required
+               </ion-text>
+            </ion-item>
+
+            <ion-item-divider [hidden]="!editMode">
+               <ion-label>Phone Numbers</ion-label>
+               <ion-button fill="clear" slot="end" (click)="addNewItem('phoneNumbers')">
+                  <ion-icon name="add-circle-outline"></ion-icon>
+               </ion-button>
+            </ion-item-divider>
+            <ion-list *ngIf="profile.phoneNumbers && profile.phoneNumbers.length > 0">
+               <ion-item *ngFor="let phNum of profile.phoneNumbers; index as i; trackBy:trackByFn">
+                  <ion-input value="{{phNum.value}}" id="phone{{i}}" name="phone{{i}}" placeholder="enter number"
+                     [(ngModel)]="phNum.value" type="string" [readonly]="!editMode" #phoneInput="ngModel"></ion-input>
+                  <ion-button fill="clear" slot="end" [hidden]="!editMode" (click)="removeItemFromArray(phNum, profile.phoneNumbers)">
+                     <ion-icon color="danger" name="remove-circle"></ion-icon>
+                  </ion-button>
+               </ion-item>
+            </ion-list>
+
+            <ion-item-divider [hidden]="!editMode">
+               <ion-label>Emails</ion-label>
+               <ion-button fill="clear" slot="end" (click)="addNewItem('emails')">
+                  <ion-icon name="add-circle-outline"></ion-icon>
+               </ion-button>
+            </ion-item-divider>
+            <ion-list *ngIf="profile.emails && profile.emails.length > 0">
+               <ion-item *ngFor="let email of profile.emails; index as i; trackBy:trackByFn">
+                  <ion-input value="{{email.value}}" id="email{{i}}" name="email{{i}}" placeholder="enter email"
+                     [(ngModel)]="email.value" type="email" email [readonly]="!editMode" #emailInput="ngModel"></ion-input>
+                  <ion-button fill="clear" slot="end" [hidden]="!editMode" (click)="removeItemFromArray(email, profile.emails)">
+                     <ion-icon color="danger" name="remove-circle"></ion-icon>
+                  </ion-button>
+               </ion-item>
+            </ion-list>
+
+            <ion-item-divider [hidden]="!editMode">
+               <ion-label>Addresses</ion-label>
+               <ion-button fill="clear" slot="end" (click)="addNewItem('addresses')">
+                  <ion-icon name="add-circle-outline"></ion-icon>
+               </ion-button>
+            </ion-item-divider>
+            <ion-list *ngIf="profile.addresses && profile.addresses.length > 0">
+               <ion-item *ngFor="let address of profile.addresses; index as i; trackBy:trackByFn">
+                  <ion-input value="{{address.value}}" id="address{{i}}" name="address{{i}}" placeholder="enter address"
+                     [(ngModel)]="address.value" type="string" [readonly]="!editMode" #addressInput="ngModel"></ion-input>
+                  <ion-button fill="clear" slot="end" [hidden]="!editMode" (click)="removeItemFromArray(address, profile.addresses)">
+                     <ion-icon color="danger" name="remove-circle"></ion-icon>
+                  </ion-button>
+               </ion-item>
+            </ion-list>
+
+            <ion-item-divider [hidden]="!editMode">
+               <ion-label>Organizations</ion-label>
+               <ion-button fill="clear" slot="end" (click)="addNewItem('organizations')">
+                  <ion-icon name="add-circle-outline"></ion-icon>
+               </ion-button>
+            </ion-item-divider>
+            <ion-list *ngIf="profile.organizations && profile.organizations.length > 0">
+               <ion-item *ngFor="let org of profile.organizations; index as i; trackBy:trackByFn">
+                  <ion-input value="{{org.value}}" id="org{{i}}" name="org{{i}}" placeholder="enter organization"
+                     [(ngModel)]="org.value" type="string" [readonly]="!editMode" #orgInput="ngModel"></ion-input>
+                  <ion-button fill="clear" slot="end" [hidden]="!editMode" (click)="removeItemFromArray(org, profile.organizations)">
+                     <ion-icon color="danger" name="remove-circle"></ion-icon>
+                  </ion-button>
+               </ion-item>
+            </ion-list>
+         </ion-item-group>
+
       </form>
    </ion-card-content>
 </ion-card>

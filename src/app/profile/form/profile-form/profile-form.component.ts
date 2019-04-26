@@ -1,18 +1,21 @@
-import { Component, OnInit, EventEmitter, Output, HostListener } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { ProfileService } from '../../service/profile.service';
 import { Profile } from '../../model/profile';
 import { DebugService } from 'src/app/debug/debug.service';
 import { ToastController } from '@ionic/angular';
+import { ContactField } from '@ionic-native/contacts/ngx';
 
 @Component({
    selector: 'app-profile-form',
    templateUrl: './profile-form.component.html',
    styleUrls: ['./profile-form.component.scss']
 })
-export class ProfileFormComponent implements OnInit {
+export class ProfileFormComponent {
 
    @Output() saveClicked: EventEmitter<null> = new EventEmitter<null>();
    profile: Profile = new Profile();
+   firstNumber;
+   editMode = false;
 
    constructor(private profileService: ProfileService, private debugService: DebugService, public toastController: ToastController) { }
 
@@ -23,6 +26,7 @@ export class ProfileFormComponent implements OnInit {
       const profileResponse = await this.profileService.getPersonalProfile();
       if (profileResponse != null && profileResponse != undefined && profileResponse != '') {
          this.profile = profileResponse;
+         this.initEmptyProfileFields();
          this.debugService.add("ProfileFormComponent: personal profile from UB store.");
          this.debugService.add(JSON.stringify(this.profile));
       } else {
@@ -30,13 +34,82 @@ export class ProfileFormComponent implements OnInit {
       }
    }
 
+   initEmptyProfileFields() {
+      if (this.profile.phoneNumbers && this.profile.phoneNumbers.length === 1
+         && (!this.profile.phoneNumbers[0].value || this.profile.phoneNumbers[0].value == '')) {
+         this.profile.phoneNumbers = [];
+      }
+
+      if (this.profile.emails && this.profile.emails.length === 1
+         && (!this.profile.emails[0].value || this.profile.emails[0].value == '')) {
+         this.profile.emails = [];
+      }
+
+      if (this.profile.addresses && this.profile.addresses.length === 1
+         && (!this.profile.addresses[0].value || this.profile.addresses[0].value == '')) {
+         this.profile.addresses = [];
+      }
+
+      if (this.profile.organizations && this.profile.organizations.length === 1
+         && (!this.profile.organizations[0].value || this.profile.organizations[0].value == '')) {
+         this.profile.organizations = [];
+      }
+   }
+
    onSubmit() {
+      this.filterEmptyContactFields();
+      this.editMode = false;
       this.debugService.add("ProfileFormComponent.onSubmit: Submitted, Saved personal profile.");
       this.debugService.add(JSON.stringify(this.profile));
+
+      //let profileTest = new Profile("Joe", "Smith", "Joe Smith", ["555-111-2222"], ["juice@upbook.com"], ["123 Some Steet"], []);
+      //this.profile.phoneNumbers = ["555-111-2222"];
+      //this.profile.phoneNumbers = undefined;
       this.profileService.saveProfileToUBDatabase(this.profile);
       // emits event to parent profile page
       this.saveClicked.emit();
       this.presentToast('Profile Saved!', 'success');
+   }
+
+   addNewItem(profileItemArrayName) {
+      if (this.profile[profileItemArrayName].length >= 1) {
+         if (this.profile[profileItemArrayName][this.profile[profileItemArrayName].length - 1].value != null
+            && this.profile[profileItemArrayName][this.profile[profileItemArrayName].length - 1].value != '') {
+               this.profile[profileItemArrayName].push(new ContactField());
+         } else {
+            this.profile[profileItemArrayName][this.profile[profileItemArrayName].length - 1] = new ContactField();
+         }
+      } else {
+         this.profile[profileItemArrayName] = [];
+         this.profile[profileItemArrayName].push(new ContactField());
+      }
+   }
+
+   private filterEmptyContactFields() {
+      this.profile.phoneNumbers = this.clearEmptyItems(this.profile.phoneNumbers);
+      this.profile.emails = this.clearEmptyItems(this.profile.emails);
+      this.profile.addresses = this.clearEmptyItems(this.profile.addresses);
+      this.profile.organizations = this.clearEmptyItems(this.profile.organizations);
+   }
+
+   private clearEmptyItems(contactFieldsArray) {
+      if (contactFieldsArray && contactFieldsArray.length >= 1) {
+         contactFieldsArray = contactFieldsArray.filter(item => item.value && item.value != '');
+      }
+      return contactFieldsArray;
+   }
+
+   removeItemFromArray(item, itemArray) {
+      itemArray = itemArray.splice(itemArray.indexOf(item), 1);
+   }
+
+   cancel() {
+      this.editMode = false;
+      this.getPersonalProfile();
+   }
+
+   editProfile(isEditMode: boolean) {
+      this.editMode = isEditMode;
    }
 
    async presentToast(message, color) {
@@ -48,5 +121,7 @@ export class ProfileFormComponent implements OnInit {
       toast.present();
    }
 
-   ngOnInit() { }
+   trackByFn(index: any, item: any) {
+      return index;
+   }
 }

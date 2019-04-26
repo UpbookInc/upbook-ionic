@@ -16,6 +16,8 @@ export class ProfilePage {
 
    networkEstablished: Boolean = false;
    profileComplete: Boolean = false;
+   editMode = false;
+
    constructor(private profileService: ProfileService, private networkStoreService: NetworkStoreService, private debugService: DebugService) { }
 
    private async isNetworkBeenEstablished() {
@@ -46,9 +48,25 @@ export class ProfilePage {
       }
    }
 
+   saveProfile() {
+      this.editMode = false;
+      this.profileFormComponent.onSubmit();
+   }
+
+   cancel() {
+      this.editMode = false;
+      this.profileFormComponent.cancel();
+   }
+
+   editProfile() {
+      this.editMode = true;
+      this.profileFormComponent.editProfile(true);
+   }
+
    private performNecessaryStartupTasks() {
       this.checkIsProfileSavedToUBDatabase();
       this.isNetworkBeenEstablished();
+      this.editMode = false;
    }
 
    // called when profile form save is clicked

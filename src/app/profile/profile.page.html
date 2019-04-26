@@ -3,15 +3,18 @@
       <ion-title>
          My Profile
       </ion-title>
+      <ion-buttons slot="end">
+         <ion-button *ngIf="!editMode" color="primary" (click)="editProfile()">Edit</ion-button>
+         <ion-button *ngIf="editMode" color="success" (click)="saveProfile()">Save</ion-button>
+         <ion-button *ngIf="editMode" color="default" (click)="cancel()">Cancel</ion-button>
+      </ion-buttons>
+   </ion-toolbar>
+   <ion-toolbar [hidden]="profileComplete === true">
+      <ion-text color="primary">Please complete your profile.</ion-text>
    </ion-toolbar>
 </ion-header>
 
 <ion-content>
-   <ion-card>
-      <ion-card-content [hidden]="profileComplete === true">
-         <ion-text color="primary">Please complete your profile.</ion-text>
-      </ion-card-content>
-   </ion-card>
    <app-profile-form (saveClicked)="eventFromChild()"></app-profile-form>
    <ion-card [hidden]="networkEstablished !== true">
       <ion-card-content>
