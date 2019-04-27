@@ -99,24 +99,42 @@ export class Tab2Page {
    }
 
    private async importNewContactsFromDeviceToUb(currentUbNetwork) {
+      let updateNeeded = false;
       let deviceContacts = await this.contactService.queryAllDeviceContacts();
-      let missingUBContacts = this.getArrayItemsNotInSecondArray(deviceContacts, currentUbNetwork, 'id');
-      console.log(missingUBContacts.length);
 
-      if (missingUBContacts && missingUBContacts.length > 0) {
-         missingUBContacts.forEach(element => {
-            console.log(element.displayName + ", " + element.id);
+      // preserve in network selections by adding/removing to currentUbNetwork
+      let missingDeviceContacts = this.getArrayItemsNotInSecondArray(deviceContacts, currentUbNetwork, 'id');
+      if (missingDeviceContacts && missingDeviceContacts.length > 0) {
+         missingDeviceContacts.map(missingDevCont => currentUbNetwork.push(missingDevCont));
+         updateNeeded = true;
+      }
+
+      let extraneousUBContacts = this.getArrayItemsNotInSecondArray(currentUbNetwork, deviceContacts, 'id');
+      if (extraneousUBContacts && extraneousUBContacts.length > 0) {
+         let extraneousFilteredUbNetwork = currentUbNetwork.filter(contact => {
+            return extraneousUBContacts.find(extraContact => extraContact.id != contact.id);
          });
-         deviceContacts.push(missingUBContacts);
-         this.networkStoreService.saveContactsToStore(deviceContacts);
+         if (extraneousFilteredUbNetwork && extraneousFilteredUbNetwork.length > 0) {
+            currentUbNetwork = extraneousFilteredUbNetwork;
+            updateNeeded = true;
+         }
+      }
+
+      if (updateNeeded === true) {
+         this.networkStoreService.saveContactsToStore(currentUbNetwork);
          return await this.networkStoreService.getUBDatabaseOfContacts();
       }
-      return deviceContacts;
+
+      return currentUbNetwork;
    }
 
    private getArrayItemsNotInSecondArray(firstArray, secondArray, fieldCheckName: string = 'value') {
-      return firstArray.filter(firstArrayItem =>
-         secondArray.map(secondArrayItem => secondArrayItem[fieldCheckName]).indexOf(firstArrayItem[fieldCheckName]) === -1)
+      return firstArray.filter(firstArrayItem => {
+         if (firstArrayItem && firstArrayItem[fieldCheckName]) {
+            return secondArray.map(secondArrayItem => secondArrayItem[fieldCheckName]).indexOf(firstArrayItem[fieldCheckName]) === -1
+         }
+         return false;
+      })
    }
 
    loadContacts(subjectContactData, infiniteScrollParam?) {

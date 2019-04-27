@@ -7,15 +7,24 @@
 <ion-content>
    <ion-card>
       <ion-card-header class="ion-text-center">
-         <ion-button (click)="sendProfileToNetwork()" [disabled]="sending === true || displayedContacts < 1"
-            size="default" fill="solid" color="primary" type="submit">
+
+         <ion-button (click)="sendProfileToNetwork()"
+            [disabled]="sending === true || !displayedContacts || displayedContacts.length < 1" size="default"
+            fill="solid" color="primary" type="submit">
             Send Profile to Network
          </ion-button>
+
          <ion-buttons *ngIf="sending === true" slot="end">
             <ion-button fill="clear" size="default">
                <ion-spinner></ion-spinner>
             </ion-button>
          </ion-buttons>
+         <ion-item>
+            <ion-button slot="end" [disabled]="sending === true || !displayedContacts || displayedContacts.length < 1"
+               (click)="clearNetworkSelections()" fill="solid" color="secondary" size="small" type="submit">
+               Clear Network
+            </ion-button>
+         </ion-item>
       </ion-card-header>
 
       <ion-list>

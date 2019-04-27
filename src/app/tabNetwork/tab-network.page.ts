@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { NetworkStoreService } from '../networkStore/networkStore.service';
 import { ProfileService } from '../profile/service/profile.service';
 import { ToastService } from '../toast/toast.service';
+import { Contact } from '@ionic-native/contacts/ngx';
 
 @Component({
    selector: 'app-tab-network',
@@ -26,6 +27,18 @@ export class TabNetworkPage {
          this.sending = false;
          this.toastService.presentToast('Send failed, try back later', 'danger');
       });
+   }
+
+   async clearNetworkSelections() {
+      let contactsToUpdate: Array<Contact> = [];
+      this.displayedContacts.map(contact => {
+         if (contact.inNetwork === true) {
+            contact.inNetwork = false;
+            contactsToUpdate.push(contact)
+         }
+      });
+      await this.networkStoreService.updateMultipleUBContacts(contactsToUpdate);
+      this.loadInNetworkContacts();
    }
 
    ionViewDidEnter() {

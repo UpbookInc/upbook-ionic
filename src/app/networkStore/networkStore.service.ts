@@ -35,7 +35,7 @@ export class NetworkStoreService {
          let inNetworkContacts = ubContacts.filter(contact => contact.inNetwork === true);
          return _.cloneDeep(inNetworkContacts);
       } catch (error) {
-         return Promise.reject(undefined);
+         return Promise.resolve([]);
       }
    }
 
