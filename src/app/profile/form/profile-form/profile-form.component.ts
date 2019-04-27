@@ -24,7 +24,7 @@ export class ProfileFormComponent {
       this.debugService.add("ProfileFormComponent.getPersonalProfile: getting personal profile from store.");
 
       const profileResponse = await this.profileService.getPersonalProfile();
-      if (profileResponse != null && profileResponse != undefined && profileResponse != '') {
+      if (profileResponse) {
          this.profile = profileResponse;
          this.debugService.add("ProfileFormComponent: personal profile from UB store.");
          this.debugService.add(JSON.stringify(this.profile));

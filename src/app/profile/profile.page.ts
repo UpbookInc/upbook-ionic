@@ -3,6 +3,7 @@ import { ProfileService } from './service/profile.service';
 import { NetworkStoreService } from '../networkStore/networkStore.service';
 import { DebugService } from '../debug/debug.service';
 import { ProfileFormComponent } from './form/profile-form/profile-form.component';
+import { Profile } from './model/profile';
 
 @Component({
    selector: 'app-profile',
@@ -37,13 +38,13 @@ export class ProfilePage {
    }
 
    private async checkIsProfileSavedToUBDatabase() {
-      const result = await this.profileService.isProfileSavedToUBDatabase();
-      if (result == null || result == undefined || result == '') {
+      const ubProfile: Profile = await this.profileService.isProfileSavedToUBDatabase();
+      if (!ubProfile || !this.profileService.isFirstNameSet(ubProfile) || !this.profileService.isPhoneNumbersSet(ubProfile)) {
          this.debugService.add("ProfilePage.checkIsProfileSavedToUBDatabase UB profile to be created");
          this.profileComplete = false;
          this.editMode = true;
+         this.profileFormComponent.editProfile(true);
       } else {
-         //TODO: check for all required fields to be complete
          this.debugService.add("ProfilePage.checkIsProfileSavedToUBDatabase UB profile already exists");
          this.profileComplete = true;
       }

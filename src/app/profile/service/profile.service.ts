@@ -88,7 +88,7 @@ export class ProfileService {
       return this.storage.get(this.UB_PROFILE_KEY);
    }
 
-   isProfileSavedToUBDatabase(): Promise<any> {
+   isProfileSavedToUBDatabase(): Promise<Profile> {
       return this.storage.get(this.UB_PROFILE_KEY);
    }
 
@@ -103,7 +103,7 @@ export class ProfileService {
          phoneNumbers: personalProfile.phoneNumbers,
          emails: personalProfile.emails,
          addresses: personalProfile.addresses,
-         organizations: personalProfile.organizations, 
+         organizations: personalProfile.organizations,
          displayName: personalProfile.displayName,
          name: {
             familyName: personalProfile.firstName,
@@ -112,5 +112,20 @@ export class ProfileService {
          }
       }
       return profileContact
+   }
+
+   isFirstNameSet(profile: Profile): boolean {
+      if (!profile.firstName || profile.firstName === '') {
+         return false;
+      }
+      return true;
+   }
+
+   isPhoneNumbersSet(profile: Profile): boolean {
+      if (!profile.phoneNumbers || profile.phoneNumbers.length < 1 || !profile.phoneNumbers[0].value || profile.phoneNumbers[0].value === '') {
+         return false;
+      } else {
+         return true;
+      }
    }
 }

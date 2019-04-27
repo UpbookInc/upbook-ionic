@@ -14,6 +14,4 @@ export class Profile {
       public addresses?: ContactAddress[],
       public organizations?: ContactOrganization[]) {
    }
-
-   
 }

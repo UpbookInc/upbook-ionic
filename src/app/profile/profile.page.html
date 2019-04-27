@@ -9,8 +9,8 @@
          <ion-button *ngIf="editMode" color="success" (click)="saveProfile()">Save</ion-button>
       </ion-buttons>
    </ion-toolbar>
-   <ion-toolbar [hidden]="profileComplete === true">
-      <ion-title color="primary">Please complete your profile</ion-title>
+   <ion-toolbar class="ion-text-center" [hidden]="profileComplete === true">
+      <ion-text color="primary">Please complete your profile</ion-text>
    </ion-toolbar>
 </ion-header>
 
