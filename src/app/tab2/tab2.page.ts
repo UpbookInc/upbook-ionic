@@ -3,6 +3,7 @@ import { NetworkStoreService } from '../networkStore/networkStore.service';
 import { Platform, IonInfiniteScroll } from '@ionic/angular';
 import { Contact } from '@ionic-native/contacts/ngx';
 import { DebugService } from '../debug/debug.service';
+import { ContactsService } from '../contacts/contacts.service';
 
 @Component({
    selector: 'app-tab2',
@@ -13,7 +14,7 @@ export class Tab2Page {
 
    searching: any = false;
    searchTerm: string = '';
-   allContacts;
+   allUBContacts;
    displayedContacts = [];
    filteredContacts = [];
    isNetworkSelectionDisabled: boolean = false;
@@ -26,7 +27,7 @@ export class Tab2Page {
    @ViewChild(IonInfiniteScroll) infiniteScroll: IonInfiniteScroll;
 
    constructor(private networkStoreService: NetworkStoreService, private platform: Platform,
-      private debugService: DebugService) {
+      private debugService: DebugService, private contactService: ContactsService) {
    }
 
    setFilteredItems(reset) {
@@ -35,7 +36,7 @@ export class Tab2Page {
          this.searchTerm = '';
       }
 
-      this.filteredContacts = this.allContacts.filter((item) => {
+      this.filteredContacts = this.allUBContacts.filter((item) => {
          if (item.name && item.name.formatted) {
             return item.name.formatted.toLowerCase().indexOf(this.searchTerm.toLowerCase()) > -1;
          } else {
@@ -59,7 +60,7 @@ export class Tab2Page {
 
    clearNetworkSelections() {
       let contactsToUpdate: Array<Contact> = [];
-      this.allContacts.map(contact => {
+      this.allUBContacts.map(contact => {
          if (contact.inNetwork === true) {
             contact.inNetwork = false;
             contactsToUpdate.push(contact)
@@ -72,30 +73,50 @@ export class Tab2Page {
 
    private async checkIsUBNetworkDatabaseCreated() {
       try {
-         const successResults = await this.networkStoreService.getUBDatabaseOfContacts();
-         if (successResults == null || successResults == undefined) {
+         const ubContacts = await this.networkStoreService.getUBDatabaseOfContacts();
+
+         if (ubContacts == null || ubContacts == undefined) {
             this.debugService.add("Tab2Page.checkIsUBNetworkDatabaseCreated: UB Addressbook to be created.");
             this.networkStoreService.getAllAddressbookContactsFromDevice().then(deviceContacts => {
-               this.allContacts = this.sortData(deviceContacts);
-               this.initContactsTable(this.allContacts);
-               this.loadContacts(this.allContacts, undefined);
-               this.networkStoreService.saveContactsToStore(this.allContacts);
+               this.allUBContacts = this.sortData(deviceContacts);
+               this.initContactsTable(this.allUBContacts);
+               this.loadContacts(this.allUBContacts, undefined);
+               this.networkStoreService.saveContactsToStore(this.allUBContacts);
                this.debugService.add("Tab2Page.checkIsUBNetworkDatabaseCreated: saved contacts to UB store.");
             });
-
          } else {
             this.debugService.add("Tab2Page.checkIsUBNetworkDatabaseCreated: UB addressbook database already exists.");
 
-            this.allContacts = this.sortData(successResults);
-            this.initContactsTable(successResults);
-            this.loadContacts(this.allContacts, undefined);
-
+            this.allUBContacts = await this.importNewContactsFromDeviceToUb(ubContacts);
+            this.allUBContacts = this.sortData(this.allUBContacts);
+            this.initContactsTable(ubContacts);
+            this.loadContacts(this.allUBContacts, undefined);
             this.checkForMaximumSelectedNetworkContacts(true);
          }
-      }
-      catch (error) {
+      } catch (error) {
          return Promise.reject(undefined);
       }
+   }
+
+   private async importNewContactsFromDeviceToUb(currentUbNetwork) {
+      let deviceContacts = await this.contactService.queryAllDeviceContacts();
+      let missingUBContacts = this.getArrayItemsNotInSecondArray(deviceContacts, currentUbNetwork, 'id');
+      console.log(missingUBContacts.length);
+
+      if (missingUBContacts && missingUBContacts.length > 0) {
+         missingUBContacts.forEach(element => {
+            console.log(element.displayName + ", " + element.id);
+         });
+         deviceContacts.push(missingUBContacts);
+         this.networkStoreService.saveContactsToStore(deviceContacts);
+         return await this.networkStoreService.getUBDatabaseOfContacts();
+      }
+      return deviceContacts;
+   }
+
+   private getArrayItemsNotInSecondArray(firstArray, secondArray, fieldCheckName: string = 'value') {
+      return firstArray.filter(firstArrayItem =>
+         secondArray.map(secondArrayItem => secondArrayItem[fieldCheckName]).indexOf(firstArrayItem[fieldCheckName]) === -1)
    }
 
    loadContacts(subjectContactData, infiniteScrollParam?) {
@@ -125,7 +146,7 @@ export class Tab2Page {
       if (this.searchTerm && this.searchTerm != '') {
          this.loadContacts(this.filteredContacts, infiniteScrollParam);
       } else {
-         this.loadContacts(this.allContacts, infiniteScrollParam);
+         this.loadContacts(this.allUBContacts, infiniteScrollParam);
       }
    }
 
@@ -158,7 +179,7 @@ export class Tab2Page {
    }
 
    getSelectedNetworkSize() {
-      return this.allContacts.filter(contact => contact.inNetwork).length;
+      return this.allUBContacts.filter(contact => contact.inNetwork).length;
    }
 
    sortData(array: Array<Contact>): Array<Contact> {

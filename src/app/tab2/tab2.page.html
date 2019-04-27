@@ -23,7 +23,12 @@
 
       <ion-list>
          <ion-item *ngFor="let contact of displayedContacts">
-            <ion-label>{{contact.name?.givenName || "[missing name]"}} {{contact.name?.familyName}}</ion-label>
+            <ion-label>{{contact.name?.givenName || "[missing name]"}} {{contact.name?.familyName}}
+               <p *ngIf="contact.phoneNumbers && contact.phoneNumbers[0]?.value">{{contact.phoneNumbers[0]?.value}}</p>
+               <p *ngIf="(!contact.phoneNumbers || !contact.phoneNumbers[0]?.value) 
+                  && contact.emails && contact.emails[0]?.value">
+                  {{contact.emails[0]?.value}}</p>
+            </ion-label>
             <ion-checkbox slot="start" [(ngModel)]="contact.inNetwork"
                [disabled]="isNetworkSelectionDisabled === true && contact.inNetwork !== true"
                (ngModelChange)="toggleContactForNetwork(contact)"></ion-checkbox>

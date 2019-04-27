@@ -7,7 +7,7 @@
 <ion-content>
    <ion-card>
       <ion-card-header class="ion-text-center">
-         <ion-button (click)="sendProfileToNetwork()" [disabled]="sending === true || selectedNetworkSize < 1"
+         <ion-button (click)="sendProfileToNetwork()" [disabled]="sending === true || displayedContacts < 1"
             size="default" fill="solid" color="primary" type="submit">
             Send Profile to Network
          </ion-button>
@@ -20,7 +20,11 @@
 
       <ion-list>
          <ion-item *ngFor="let contact of displayedContacts">
-            <ion-label>{{contact.name?.givenName || "[missing name]"}} {{contact.name?.familyName}}</ion-label>
+            <ion-label>{{contact.name?.givenName || "[missing name]"}} {{contact.name?.familyName}}
+               <p *ngIf="contact.phoneNumbers && contact.phoneNumbers[0]?.value">{{contact.phoneNumbers[0]?.value}}</p>
+               <p *ngIf="(!contact.phoneNumbers || !contact.phoneNumbers[0]?.value) 
+                     && contact.emails && contact.emails[0]?.value">
+            </ion-label>
             <ion-button fill="clear" slot="end" (click)="removeFromNetwork(contact)">
                <ion-icon color="danger" name="remove-circle"></ion-icon>
             </ion-button>
