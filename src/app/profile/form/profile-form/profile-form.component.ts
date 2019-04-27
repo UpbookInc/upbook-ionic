@@ -2,8 +2,8 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { ProfileService } from '../../service/profile.service';
 import { Profile, baseAddrName, baseOrgName } from '../../model/profile';
 import { DebugService } from 'src/app/debug/debug.service';
-import { ToastController } from '@ionic/angular';
 import { ContactField } from '@ionic-native/contacts/ngx';
+import { ToastService } from 'src/app/toast/toast.service';
 
 @Component({
    selector: 'app-profile-form',
@@ -17,7 +17,7 @@ export class ProfileFormComponent {
    firstNumber;
    editMode = false;
 
-   constructor(private profileService: ProfileService, private debugService: DebugService, public toastController: ToastController) { }
+   constructor(private profileService: ProfileService, private debugService: DebugService, public toastService: ToastService) { }
 
    // this is called by the parent profile page each time the view becomes active
    async getPersonalProfile() {
@@ -81,7 +81,7 @@ export class ProfileFormComponent {
       this.profileService.saveProfileToUBDatabase(this.profile);
       // emits event to parent profile page
       this.saveClicked.emit();
-      this.presentToast('Profile Saved!', 'success');
+      this.toastService.presentToast('Profile Saved!', 'success');
    }
 
    addNewItem(profileItemArrayName, baseFieldName: string = 'value') {
@@ -123,15 +123,6 @@ export class ProfileFormComponent {
 
    editProfile(isEditMode: boolean) {
       this.editMode = isEditMode;
-   }
-
-   async presentToast(message, color) {
-      const toast = await this.toastController.create({
-         message: message,
-         duration: 3000,
-         color: color
-      });
-      toast.present();
    }
 
    trackByFn(index: any, item: any) {

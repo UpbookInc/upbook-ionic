@@ -3,18 +3,6 @@
       <ion-searchbar [(ngModel)]="searchTerm" (ionClear)="setFilteredItems(true)" (ionChange)="setFilteredItems(false)"
          placeholder="Search Contacts" id="contactSearchbar" clear-icon #contactSearchbar></ion-searchbar>
    </ion-toolbar>
-
-   <ion-toolbar>
-      <ion-button (click)="sendProfileToNetwork()" [disabled]="sending === true || selectedNetworkSize < 1"
-         size="default" fill="solid" color="primary" type="submit">
-         Send Profile to Network
-      </ion-button>
-      <ion-buttons *ngIf="sending === true" slot="end">
-         <ion-button fill="clear" size="default">
-            <ion-spinner></ion-spinner>
-         </ion-button>
-      </ion-buttons>
-   </ion-toolbar>
 </ion-header>
 
 <ion-content>
@@ -43,7 +31,8 @@
       </ion-list>
    </ion-card>
 
-   <ion-infinite-scroll (ionInfinite)="loadMoreContacts($event)" loadingSpinner="bubbles" loadingText="Loading Contacts...">
+   <ion-infinite-scroll (ionInfinite)="loadMoreContacts($event)" loadingSpinner="bubbles"
+      loadingText="Loading Contacts...">
       <ion-infinite-scroll-content></ion-infinite-scroll-content>
    </ion-infinite-scroll>
 </ion-content>

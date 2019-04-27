@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { ProfileService } from './service/profile.service';
 import { NetworkStoreService } from '../networkStore/networkStore.service';
 import { DebugService } from '../debug/debug.service';

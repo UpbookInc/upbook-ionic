@@ -1,8 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { NetworkStoreService } from '../networkStore/networkStore.service';
-import { Platform, ToastController, IonInfiniteScroll } from '@ionic/angular';
+import { Platform, IonInfiniteScroll } from '@ionic/angular';
 import { Contact } from '@ionic-native/contacts/ngx';
-import { ProfileService } from '../profile/service/profile.service';
 import { DebugService } from '../debug/debug.service';
 
 @Component({
@@ -12,7 +11,6 @@ import { DebugService } from '../debug/debug.service';
 })
 export class Tab2Page {
 
-   private userUuid: String;
    searching: any = false;
    searchTerm: string = '';
    allContacts;
@@ -21,7 +19,6 @@ export class Tab2Page {
    isNetworkSelectionDisabled: boolean = false;
    MAX_IN_NETWORK_CONTACTS_SELECTED = 4;
    selectedNetworkSize: any = 0;
-   sending: boolean;
    currentPage = 0;
    pageCount = 1;
    CONTACTS_PER_PAGE = 50;
@@ -29,7 +26,7 @@ export class Tab2Page {
    @ViewChild(IonInfiniteScroll) infiniteScroll: IonInfiniteScroll;
 
    constructor(private networkStoreService: NetworkStoreService, private platform: Platform,
-      private profileService: ProfileService, private debugService: DebugService, public toastController: ToastController) {
+      private debugService: DebugService) {
    }
 
    setFilteredItems(reset) {
@@ -60,31 +57,6 @@ export class Tab2Page {
       this.searching = false;
    }
 
-   ionViewDidEnter() {
-      this.platform.ready().then((readySource) => {
-         this.displayedContacts = [];
-         this.filteredContacts = [];
-         this.searchTerm = '';
-         this.searching = false;
-         this.checkIsUBNetworkDatabaseCreated();
-      });
-   }
-
-   toggleContactForNetwork(contactToToggleForNetwork: Contact) {
-      this.checkForMaximumSelectedNetworkContacts(contactToToggleForNetwork.inNetwork);
-      this.networkStoreService.updateMultipleUBContacts([contactToToggleForNetwork]);
-   }
-
-   checkForMaximumSelectedNetworkContacts(isContactSelected) {
-      this.selectedNetworkSize = this.getSelectedNetworkSize();
-      if (isContactSelected === true &&
-         this.selectedNetworkSize === this.MAX_IN_NETWORK_CONTACTS_SELECTED) {
-         this.isNetworkSelectionDisabled = true;
-      } else {
-         this.isNetworkSelectionDisabled = false;
-      }
-   }
-
    clearNetworkSelections() {
       let contactsToUpdate: Array<Contact> = [];
       this.allContacts.map(contact => {
@@ -96,10 +68,6 @@ export class Tab2Page {
       this.networkStoreService.updateMultipleUBContacts(contactsToUpdate);
       this.selectedNetworkSize = this.getSelectedNetworkSize();
       this.checkForMaximumSelectedNetworkContacts(true);
-   }
-
-   getSelectedNetworkSize() {
-      return this.allContacts.filter(contact => contact.inNetwork).length;
    }
 
    private async checkIsUBNetworkDatabaseCreated() {
@@ -130,18 +98,10 @@ export class Tab2Page {
       }
    }
 
-   loadMoreContacts(infiniteScrollParam?) {
-      if (this.searchTerm && this.searchTerm != '') {
-         this.loadContacts(this.filteredContacts, infiniteScrollParam);
-      } else {
-         this.loadContacts(this.allContacts, infiniteScrollParam);
-      }
-   }
-
    loadContacts(subjectContactData, infiniteScrollParam?) {
       let startIndex = this.currentPage * this.CONTACTS_PER_PAGE;
       let endIndex = startIndex + this.CONTACTS_PER_PAGE;
-      
+
       this.displayedContacts = this.displayedContacts.concat(
          subjectContactData.slice(startIndex, endIndex));
 
@@ -161,10 +121,44 @@ export class Tab2Page {
       }
    }
 
+   loadMoreContacts(infiniteScrollParam?) {
+      if (this.searchTerm && this.searchTerm != '') {
+         this.loadContacts(this.filteredContacts, infiniteScrollParam);
+      } else {
+         this.loadContacts(this.allContacts, infiniteScrollParam);
+      }
+   }
+
+   ionViewDidEnter() {
+      this.platform.ready().then((readySource) => {
+         this.displayedContacts = [];
+         this.filteredContacts = [];
+         this.searchTerm = '';
+         this.searching = false;
+         this.currentPage = 0;
+         this.checkIsUBNetworkDatabaseCreated();
+      });
+   }
+
+   toggleContactForNetwork(contactToToggleForNetwork: Contact) {
+      this.checkForMaximumSelectedNetworkContacts(contactToToggleForNetwork.inNetwork);
+      this.networkStoreService.updateMultipleUBContacts([contactToToggleForNetwork]);
+   }
+
+   checkForMaximumSelectedNetworkContacts(isContactSelected) {
+      this.selectedNetworkSize = this.getSelectedNetworkSize();
+      this.isNetworkSelectionDisabled = this.networkStoreService.isMaximumNetworkContactsSelected(isContactSelected,
+         this.selectedNetworkSize, this.MAX_IN_NETWORK_CONTACTS_SELECTED);
+   }
+
    private initContactsTable(rawData) {
       let deviceContactsLength = rawData.length;
       let rawPageCount = deviceContactsLength / this.CONTACTS_PER_PAGE;
       this.pageCount = Math.ceil(rawPageCount);
+   }
+
+   getSelectedNetworkSize() {
+      return this.allContacts.filter(contact => contact.inNetwork).length;
    }
 
    sortData(array: Array<Contact>): Array<Contact> {
@@ -178,27 +172,6 @@ export class Tab2Page {
             // keeps missing names at bottom of list
             return 1;
          }
-      });
-   }
-
-   async presentToast(message, color) {
-      const toast = await this.toastController.create({
-         message: message,
-         duration: 3000,
-         color: color
-      });
-      toast.present();
-   }
-
-   sendProfileToNetwork() {
-      this.sending = true;
-
-      this.profileService.sendProfileToNetwork(() => {
-         this.sending = false;
-         this.presentToast('Profile Successfully Sent to Network!', 'success');
-      }, () => {
-         this.sending = false;
-         this.presentToast('Send failed, try back later', 'danger');
       });
    }
 }

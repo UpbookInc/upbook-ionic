@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Contacts, Contact, ContactField, ContactName, ContactFieldType } from '@ionic-native/contacts/ngx';
+import { Contacts, Contact, ContactField, ContactName } from '@ionic-native/contacts/ngx';
 import { Platform } from '@ionic/angular';
 import { Storage } from '@ionic/storage';
 import { DebugService } from '../debug/debug.service';
@@ -33,7 +33,7 @@ export class NetworkStoreService {
       try {
          const ubContacts = await this.getUBDatabaseOfContacts();
          let inNetworkContacts = ubContacts.filter(contact => contact.inNetwork === true);
-         return inNetworkContacts;
+         return _.cloneDeep(inNetworkContacts);
       } catch (error) {
          return Promise.reject(undefined);
       }
@@ -96,6 +96,14 @@ export class NetworkStoreService {
       } else {
          return contactToParse;
       }
+   }
+
+   isMaximumNetworkContactsSelected(isContactSelected, selectedNetworkSize, maxNetworkSize): boolean {
+      if (isContactSelected === true &&
+         selectedNetworkSize === maxNetworkSize) {
+         return true;
+      } 
+      return false;
    }
 
    async getUBDatabaseOfContacts(): Promise<any[]> {

@@ -1,11 +1,12 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Deeplinks } from '@ionic-native/deeplinks/ngx';
-import { NavController, ToastController } from '@ionic/angular';
+import { NavController } from '@ionic/angular';
 import { DebugService } from '../debug/debug.service';
 import { ModalController } from '@ionic/angular';
 import { ContactUpdatePage } from '../contacts/contact-update/contact-update.page';
 import { ContactsService } from '../contacts/contacts.service';
 import { DeltasService } from '../contacts/deltas/deltas.service';
+import { ToastService } from '../toast/toast.service';
 
 // DEBUG:
 // generate base64 hash of contact object with updates:
@@ -21,7 +22,7 @@ export class DeeplinkService {
 
    constructor(protected deeplinks: Deeplinks, protected navController: NavController, private zone: NgZone,
       private debugService: DebugService, private modalController: ModalController, private contactsService: ContactsService,
-      public toastController: ToastController, private deltaService: DeltasService) { }
+      public toastService: ToastService, private deltaService: DeltasService) { }
 
    setupDeepLinkRouting() {
       this.deeplinks.route({
@@ -55,12 +56,12 @@ export class DeeplinkService {
 
          modal.onDidDismiss().then(data => {
             if (data.data.save === true) {
-               this.presentToast('Saving contact updates, please wait...', 'secondary');
+               this.toastService.presentToast('Saving contact updates, please wait...', 'secondary');
                this.contactsService.updateContact(contactUpdates).then((updatedContact) => {
                   if (updatedContact == undefined) {
-                     this.presentToast('Failed to save contact updates, manually update', 'danger');
+                     this.toastService.presentToast('Failed to save contact updates, manually update', 'danger');
                   } else {
-                     this.presentToast('Successfully saved updates!', 'success');
+                     this.toastService.presentToast('Successfully saved updates!', 'success');
                   }
                });
             }
@@ -80,14 +81,5 @@ export class DeeplinkService {
       var decodedAndParsedContactUpdates = JSON.parse(decodedUpdate);
       //console.log(decodedAndParsedContactUpdates);
       return decodedAndParsedContactUpdates;
-   }
-
-   async presentToast(message, color) {
-      const toast = await this.toastController.create({
-         message: message,
-         duration: 3000,
-         color: color
-      });
-      toast.present();
    }
 }
