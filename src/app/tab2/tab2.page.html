@@ -12,7 +12,7 @@
          <ion-card-subtitle [hidden]="isNetworkSelectionDisabled !== true" color="danger">Maximum of
             {{MAX_IN_NETWORK_CONTACTS_SELECTED}} network contacts allowed</ion-card-subtitle>
          <ion-button [hidden]="selectedNetworkSize < 1" (click)="clearNetworkSelections()" fill="solid"
-            color="secondary" size="small" type="submit">
+            color="danger" size="small" type="submit">
             Clear Network
          </ion-button>
       </ion-card-header>

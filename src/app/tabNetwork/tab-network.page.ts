@@ -23,9 +23,13 @@ export class TabNetworkPage {
       this.profileService.sendProfileToNetwork(() => {
          this.sending = false;
          this.toastService.presentToast('Profile Successfully Sent to Network!', 'success');
-      }, () => {
+      }, (error) => {
          this.sending = false;
-         this.toastService.presentToast('Send failed, try back later', 'danger');
+         if (error) {
+            this.toastService.presentToast(error, 'danger');
+         } else {
+            this.toastService.presentToast('Send failed, try back later', 'danger');
+         }
       });
    }
 

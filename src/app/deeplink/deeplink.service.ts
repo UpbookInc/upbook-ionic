@@ -7,6 +7,7 @@ import { ContactUpdatePage } from '../contacts/contact-update/contact-update.pag
 import { ContactsService } from '../contacts/contacts.service';
 import { DeltasService } from '../contacts/deltas/deltas.service';
 import { ToastService } from '../toast/toast.service';
+import { NetworkStoreService } from '../networkStore/networkStore.service';
 
 // DEBUG:
 // generate base64 hash of contact object with updates:
@@ -22,7 +23,7 @@ export class DeeplinkService {
 
    constructor(protected deeplinks: Deeplinks, protected navController: NavController, private zone: NgZone,
       private debugService: DebugService, private modalController: ModalController, private contactsService: ContactsService,
-      public toastService: ToastService, private deltaService: DeltasService) { }
+      public toastService: ToastService, private deltaService: DeltasService, private networkStoreService: NetworkStoreService) { }
 
    setupDeepLinkRouting() {
       this.deeplinks.route({
@@ -62,6 +63,8 @@ export class DeeplinkService {
                      this.toastService.presentToast('Failed to save contact updates, manually update', 'danger');
                   } else {
                      this.toastService.presentToast('Successfully saved updates!', 'success');
+                     // now save changes to UB network 
+                     this.networkStoreService.updateMultipleUBContacts([updatedContact]);
                   }
                });
             }

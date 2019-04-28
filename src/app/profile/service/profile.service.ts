@@ -98,9 +98,9 @@ export class ProfileService {
          organizations: personalProfile.organizations,
          displayName: personalProfile.displayName,
          name: {
-            familyName: personalProfile.firstName,
+            familyName: personalProfile.lastName,
             formatted: personalProfile.firstName + ' ' + personalProfile.lastName,
-            givenName: personalProfile.lastName
+            givenName: personalProfile.firstName
          }
       }
       return profileContact

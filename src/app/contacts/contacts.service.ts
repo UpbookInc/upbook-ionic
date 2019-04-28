@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Contact, Contacts, ContactField, ContactOrganization, ContactAddress } from '@ionic-native/contacts/ngx';
 import { DebugService } from '../debug/debug.service';
 import { Platform } from '@ionic/angular';
-
 import * as _ from 'lodash';
 
 @Injectable({
@@ -24,8 +23,6 @@ export class ContactsService {
       });
    }
 
-   //TODO: maybe this isn't a contact object passed in, but instead our internal data structure to house contact info
-   //TODO: consider checking what needs updating first before performing update incase additional actions need performed
    async updateContact(contactWithUpdates: Contact): Promise<any> {
       try {
          const contactFound = await this.findContactByName(contactWithUpdates.displayName);
@@ -103,7 +100,8 @@ export class ContactsService {
          if (this.currentPlatform === 'ios') {
             //TODO: this needs to have the id of the specific phone number array to work.  Otherwise, it will
             //just add a new number
-            contactAddrUpdates.push({ id: index, streetAddress: addrToAdd.streetAddress });
+            // - The type here is required.
+            contactAddrUpdates.push({ id: index, streetAddress: addrToAdd.streetAddress, type: 'home' });
          } else if (this.currentPlatform === 'android') {
             contactAddrUpdates.push(new ContactAddress(false, '', addrToAdd.streetAddress, addrToAdd.streetAddress));
          }

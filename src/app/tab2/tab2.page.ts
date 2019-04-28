@@ -72,6 +72,7 @@ export class Tab2Page {
    }
 
    private async checkIsUBNetworkDatabaseCreated() {
+      this.searching = true;
       try {
          const ubContacts = await this.networkStoreService.getUBDatabaseOfContacts();
 
@@ -83,17 +84,19 @@ export class Tab2Page {
                this.loadContacts(this.allUBContacts, undefined);
                this.networkStoreService.saveContactsToStore(this.allUBContacts);
                this.debugService.add("Tab2Page.checkIsUBNetworkDatabaseCreated: saved contacts to UB store.");
+               this.searching = false;
             });
          } else {
             this.debugService.add("Tab2Page.checkIsUBNetworkDatabaseCreated: UB addressbook database already exists.");
-
             this.allUBContacts = await this.importNewContactsFromDeviceToUb(ubContacts);
             this.allUBContacts = this.sortData(this.allUBContacts);
             this.initContactsTable(ubContacts);
             this.loadContacts(this.allUBContacts, undefined);
             this.checkForMaximumSelectedNetworkContacts(true);
+            this.searching = false;
          }
       } catch (error) {
+         this.searching = false;
          return Promise.reject(undefined);
       }
    }
