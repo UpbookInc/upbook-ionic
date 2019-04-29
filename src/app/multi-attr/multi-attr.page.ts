@@ -11,7 +11,7 @@ export class MultiAttrPage {
    multiAttrName = '';
    multiAttrValueName = '';
    multiAttrSelectMessage = '';
-   name = '';
+   name: any;
 
    constructor(private modalController: ModalController, private navParams: NavParams) {
 
