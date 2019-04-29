@@ -65,6 +65,7 @@ export class DeeplinkService {
                      this.toastService.presentToast('Successfully saved updates!', 'success');
                      // now save changes to UB network 
                      this.networkStoreService.updateMultipleUBContacts([updatedContact]);
+                     this.networkStoreService.clearSessionDeviceContacts();
                   }
                });
             }
@@ -72,17 +73,12 @@ export class DeeplinkService {
       });
    }
 
-   //TODO: build a simple object with the contact fields that we are tracking
    parseContactQueryString(queryStringWithUpdates) {
       var searchParams = new URLSearchParams(queryStringWithUpdates);
       var base64ContactUpdates = searchParams.get('updates');
-      console.log(base64ContactUpdates);
-
       var decodedUpdate = atob(base64ContactUpdates);
       console.log(decodedUpdate);
-
       var decodedAndParsedContactUpdates = JSON.parse(decodedUpdate);
-      //console.log(decodedAndParsedContactUpdates);
       return decodedAndParsedContactUpdates;
    }
 }

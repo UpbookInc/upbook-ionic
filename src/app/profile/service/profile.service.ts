@@ -30,7 +30,7 @@ export class ProfileService {
          var convertedProfileToContactFormat = this.convertPersonalProfileToContact(profileResponse);
          var profileToSend: any = {}
 
-         const inNetworkContacts = await this.networkStoreService.getUBSelectedNetworkContacts();
+         const inNetworkContacts = await this.networkStoreService.getUBDatabaseOfContacts();
          this.debugService.add("ProfileService.sendProfileToNetwork: got inNetworkContacts");
 
          // make sure the in network contacts have a number
@@ -39,10 +39,10 @@ export class ProfileService {
 
          // NOTE: just grabs the in-network contact's first number to use for sending message.
          // TODO: eventually may need to select main or preferred number
-         var inNetworkContactNumbers = contactsWithNumbers.map(contactFromDeviceinNetwork => {
-            if (contactFromDeviceinNetwork.phoneNumbers && contactFromDeviceinNetwork.phoneNumbers[0]
-               && contactFromDeviceinNetwork.phoneNumbers[0].value) {
-               return contactFromDeviceinNetwork.phoneNumbers[0].value;
+         var inNetworkContactNumbers = contactsWithNumbers.map(contactFromInNetwork => {
+            if (contactFromInNetwork.phoneNumbers && contactFromInNetwork.phoneNumbers[0]
+               && contactFromInNetwork.phoneNumbers[0].value) {
+               return contactFromInNetwork.phoneNumbers[0].value;
             }
          });
 

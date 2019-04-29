@@ -16,7 +16,7 @@
 
 <ion-content>
    <app-profile-form (saveClicked)="eventFromChild()"></app-profile-form>
-   <ion-card [hidden]="networkEstablished !== true">
+   <ion-card [hidden]="nextButtonNeeded !== true">
       <ion-card-content>
          <ion-list>
             <ion-item>

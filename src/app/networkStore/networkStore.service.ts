@@ -29,14 +29,18 @@ export class NetworkStoreService {
       });
    }
 
-   async getUBSelectedNetworkContacts(): Promise<any> {
-      try {
-         const ubContacts = await this.getUBDatabaseOfContacts();
-         let inNetworkContacts = ubContacts.filter(contact => contact.inNetwork === true);
-         return _.cloneDeep(inNetworkContacts);
-      } catch (error) {
-         return Promise.resolve([]);
-      }
+   async flagDeviceContactsInNetwork(ubContacts) {
+      // ensures the allDeviceContacts has been set.
+      await this.getAllAddressbookContactsFromDevice();
+
+      this.allDeviceContacts.map(deviceCont => {
+         const inNetworkCont = ubContacts.filter(ubCont => ubCont.id === deviceCont.id);
+         if (inNetworkCont && inNetworkCont.length > 0) {
+            deviceCont.inNetwork = true;
+         } else {
+            deviceCont.inNetwork = false;
+         }
+      });
    }
 
    async updateMultipleUBContacts(contactsToUpdate: Array<Contact>) {
@@ -54,11 +58,11 @@ export class NetworkStoreService {
       }
    }
 
-   // establishes device contacts object or returns if it's already been set
+   // establishes device contacts object or returns if it's already been set for this session
    async getAllAddressbookContactsFromDevice(): Promise<Contact[]> {
       //TODO: comment out this check for production release
       if (this.isNative === true) {
-         if (this.allDeviceContacts == null || this.allDeviceContacts == undefined || this.allDeviceContacts.length < 1) {
+         if (!this.allDeviceContacts || this.allDeviceContacts.length < 1) {
             const deviceContacts = await this.contactsService.queryAllDeviceContacts();
             this.allDeviceContacts = deviceContacts;
             return Promise.resolve(this.allDeviceContacts);
@@ -98,11 +102,10 @@ export class NetworkStoreService {
       }
    }
 
-   isMaximumNetworkContactsSelected(isContactSelected, selectedNetworkSize, maxNetworkSize): boolean {
-      if (isContactSelected === true &&
-         selectedNetworkSize === maxNetworkSize) {
+   isMaximumNetworkContactsSelected(selectedNetworkSize, maxNetworkSize): boolean {
+      if (selectedNetworkSize === maxNetworkSize) {
          return true;
-      } 
+      }
       return false;
    }
 
@@ -113,6 +116,21 @@ export class NetworkStoreService {
    saveContactsToStore(contactsToSave: Contact[]) {
       let parsedContactsToSave = this.parseJsonStringIntoContactsArray(JSON.stringify(contactsToSave))
       this.storage.set(this.UB_ADDRESS_BOOK_CONTACTS_KEY, parsedContactsToSave);
+   }
+
+   async removeNetworkContact(contactToRemove) {
+      let ubNetworkContacts = await this.getUBDatabaseOfContacts();
+      const updatedNetworkList = ubNetworkContacts.filter(netContact => netContact.id != contactToRemove.id);
+      this.saveContactsToStore(updatedNetworkList);
+      this.flagDeviceContactsInNetwork(updatedNetworkList);
+   }
+
+   clearAllNetworkContacts() {
+      this.storage.set(this.UB_ADDRESS_BOOK_CONTACTS_KEY, []);
+   }
+
+   clearSessionDeviceContacts() {
+      this.allDeviceContacts = [];
    }
 
    //TODO: comment out this check for production release

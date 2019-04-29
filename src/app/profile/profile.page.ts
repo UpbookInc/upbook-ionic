@@ -15,27 +15,11 @@ export class ProfilePage {
    @ViewChild(ProfileFormComponent)
    private profileFormComponent: ProfileFormComponent;
 
-   networkEstablished: Boolean = false;
+   nextButtonNeeded: Boolean = false;
    profileComplete: Boolean = false;
    editMode = false;
 
    constructor(private profileService: ProfileService, private networkStoreService: NetworkStoreService, private debugService: DebugService) { }
-
-   private async isNetworkBeenEstablished() {
-      try {
-         const result = await this.networkStoreService.getUBDatabaseOfContacts();
-         this.debugService.add("ProfilePage.isNetworkBeenEstablished.");
-         if (result == null || result == undefined) {
-            this.networkEstablished = true;
-         } else {
-            this.networkEstablished = false;
-         }
-         this.debugService.add("ProfilePage.isNetworkBeenEstablished, nextButtonNeeded: " + this.networkEstablished);
-      } catch (error) {
-         this.debugService.add("ProfilePage.isNetworkBeenEstablished error:");
-         this.debugService.add(error);
-      }
-   }
 
    private async checkIsProfileSavedToUBDatabase() {
       const ubProfile: Profile = await this.profileService.isProfileSavedToUBDatabase();
@@ -47,6 +31,22 @@ export class ProfilePage {
       } else {
          this.debugService.add("ProfilePage.checkIsProfileSavedToUBDatabase UB profile already exists");
          this.profileComplete = true;
+      }
+   }
+
+   private async isNetworkBeenEstablished() {
+      try {
+         const result = await this.networkStoreService.getUBDatabaseOfContacts();
+         this.debugService.add("ProfilePage.isNetworkBeenEstablished.");
+         if (!result || result.length < 1) {
+            this.nextButtonNeeded = true;
+         } else {
+            this.nextButtonNeeded = false;
+         }
+         this.debugService.add("ProfilePage.isNetworkBeenEstablished, nextButtonNeeded: " + this.nextButtonNeeded);
+      } catch (error) {
+         this.debugService.add("ProfilePage.isNetworkBeenEstablished error:");
+         this.debugService.add(error);
       }
    }
 

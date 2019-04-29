@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { NetworkStoreService } from '../networkStore/networkStore.service';
 import { ProfileService } from '../profile/service/profile.service';
 import { ToastService } from '../toast/toast.service';
-import { Contact } from '@ionic-native/contacts/ngx';
 
 @Component({
    selector: 'app-tab-network',
@@ -34,14 +33,7 @@ export class TabNetworkPage {
    }
 
    async clearNetworkSelections() {
-      let contactsToUpdate: Array<Contact> = [];
-      this.displayedContacts.map(contact => {
-         if (contact.inNetwork === true) {
-            contact.inNetwork = false;
-            contactsToUpdate.push(contact)
-         }
-      });
-      await this.networkStoreService.updateMultipleUBContacts(contactsToUpdate);
+      this.networkStoreService.clearAllNetworkContacts();
       this.loadInNetworkContacts();
    }
 
@@ -50,12 +42,11 @@ export class TabNetworkPage {
    }
 
    async removeFromNetwork(contact) {
-      contact.inNetwork = false;
-      await this.networkStoreService.updateMultipleUBContacts([contact]);
+      await this.networkStoreService.removeNetworkContact(contact);
       this.loadInNetworkContacts();
    }
 
    async loadInNetworkContacts() {
-      this.displayedContacts = await this.networkStoreService.getUBSelectedNetworkContacts();
+      this.displayedContacts = await this.networkStoreService.getUBDatabaseOfContacts();
    }
 }

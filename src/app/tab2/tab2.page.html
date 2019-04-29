@@ -11,10 +11,6 @@
          <ion-card-subtitle>Select UpBook Network</ion-card-subtitle>
          <ion-card-subtitle [hidden]="isNetworkSelectionDisabled !== true" color="danger">Maximum of
             {{MAX_IN_NETWORK_CONTACTS_SELECTED}} network contacts allowed</ion-card-subtitle>
-         <ion-button [hidden]="selectedNetworkSize < 1" (click)="clearNetworkSelections()" fill="solid"
-            color="danger" size="small" type="submit">
-            Clear Network
-         </ion-button>
       </ion-card-header>
 
       <div *ngIf="searching" class="spinner-container">
@@ -29,9 +25,11 @@
                   && contact.emails && contact.emails[0]?.value">
                   {{contact.emails[0]?.value}}</p>
             </ion-label>
-            <ion-checkbox slot="start" [(ngModel)]="contact.inNetwork"
-               [disabled]="isNetworkSelectionDisabled === true && contact.inNetwork !== true"
-               (ngModelChange)="toggleContactForNetwork(contact)"></ion-checkbox>
+            <ion-button fill="clear" slot="start"
+               [disabled]="isNetworkSelectionDisabled === true || contact.inNetwork === true"
+               (click)="saveContactToNetwork(contact)">
+               <ion-icon name="add-circle-outline"></ion-icon>
+            </ion-button>
          </ion-item>
       </ion-list>
    </ion-card>
