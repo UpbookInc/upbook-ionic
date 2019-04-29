@@ -15,10 +15,11 @@ import { Deeplinks } from '@ionic-native/deeplinks/ngx';
 import { Contacts } from '@ionic-native/contacts/ngx';
 import { HTTP } from '@ionic-native/http/ngx';
 import { ContactUpdatePage } from './contacts/contact-update/contact-update.page';
+import { MultiAttrPage } from './multi-attr/multi-attr.page';
 
 @NgModule({
-  declarations: [AppComponent, ContactUpdatePage],
-  entryComponents: [ContactUpdatePage],
+  declarations: [AppComponent, ContactUpdatePage, MultiAttrPage],
+  entryComponents: [ContactUpdatePage, MultiAttrPage],
   imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, FormsModule, IonicStorageModule.forRoot()],
   providers: [
     StatusBar,

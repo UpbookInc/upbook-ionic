@@ -27,7 +27,7 @@
             </ion-item-divider>
             <ion-list *ngIf="profile.phoneNumbers && profile.phoneNumbers.length > 0">
                <ion-item *ngFor="let phNum of profile.phoneNumbers; index as i; trackBy:trackByFn">
-                  <ion-input value="{{phNum.value}}" id="phone{{i}}" name="phone{{i}}" placeholder="enter number"
+                  <ion-input value="{{phNum.value}}" id="phone{{i}}" inputmode='tel' name="phone{{i}}" placeholder="enter number"
                      [(ngModel)]="phNum.value" type="string" [readonly]="!editMode" #phoneInput="ngModel">
                   </ion-input>
                   <ion-button fill="clear" slot="end" [hidden]="!editMode"

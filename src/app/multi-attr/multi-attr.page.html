@@ -1,0 +1,24 @@
+<ion-header>
+   <ion-toolbar>
+      <ion-title>{{name.givenName}} {{name.familyName}}</ion-title>
+      <ion-buttons slot="secondary" (click)="cancel()">
+         <ion-button>
+            Close
+         </ion-button>
+      </ion-buttons>
+   </ion-toolbar>
+   <ion-toolbar class="ion-text-center">
+      <ion-text color="primary"> {{multiAttrSelectMessage}} </ion-text>
+   </ion-toolbar>
+</ion-header>
+
+<ion-content>
+   <ion-card>
+      <ion-card-content>
+         <ion-list>
+            <ion-button *ngFor="let attr of multiAttrs" (click)="select(attr)" expand="full" fill="clear">
+               {{attr.displayValue}}</ion-button>
+         </ion-list>
+      </ion-card-content>
+   </ion-card>
+</ion-content>

@@ -12,7 +12,8 @@ export class ToastService {
       const toast = await this.toastController.create({
          message: message,
          duration: 3000,
-         color: color
+         color: color, 
+         showCloseButton: true
       });
       toast.present();
    }

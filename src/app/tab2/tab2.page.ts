@@ -1,10 +1,11 @@
 import { Component, ViewChild } from '@angular/core';
 import { NetworkStoreService } from '../networkStore/networkStore.service';
-import { Platform, IonInfiniteScroll } from '@ionic/angular';
+import { Platform, IonInfiniteScroll, ModalController } from '@ionic/angular';
 import { Contact } from '@ionic-native/contacts/ngx';
 import { DebugService } from '../debug/debug.service';
 import { ContactsService } from '../contacts/contacts.service';
 import { ToastService } from '../toast/toast.service';
+import { MultiAttrPage } from '../multi-attr/multi-attr.page';
 
 @Component({
    selector: 'app-tab2',
@@ -27,7 +28,8 @@ export class Tab2Page {
    @ViewChild(IonInfiniteScroll) infiniteScroll: IonInfiniteScroll;
 
    constructor(private networkStoreService: NetworkStoreService, private platform: Platform,
-      private debugService: DebugService, private contactService: ContactsService, public toastService: ToastService) {
+      private debugService: DebugService, private contactService: ContactsService, public toastService: ToastService,
+      private modalController: ModalController) {
    }
 
    private async checkIsUBNetworkDatabaseCreated() {
@@ -59,6 +61,14 @@ export class Tab2Page {
       // don't save if contact doesn't have number
       if (contactToToggleForNetwork && contactToToggleForNetwork.phoneNumbers
          && contactToToggleForNetwork.phoneNumbers.length > 0 && contactToToggleForNetwork.phoneNumbers[0].value) {
+
+         if (contactToToggleForNetwork.phoneNumbers.length > 1) {
+            const selectedPhoneNumber = await this.showMultiPhoneSelectionModal(contactToToggleForNetwork.name, contactToToggleForNetwork.phoneNumbers);
+            contactToToggleForNetwork.contactNumber = selectedPhoneNumber;
+         } else {
+            contactToToggleForNetwork.contactNumber = contactToToggleForNetwork.phoneNumbers[0];
+         }
+
          ubContacts.push(contactToToggleForNetwork);
          this.checkForMaximumSelectedNetworkContacts(ubContacts);
          this.networkStoreService.saveContactsToStore(ubContacts);
@@ -66,6 +76,30 @@ export class Tab2Page {
       } else {
          this.toastService.presentToast("Contact does not have a phone number!", 'danger');
       }
+   }
+
+   async showMultiPhoneSelectionModal(name, phoneNumbers) {
+      const multiAttrProps = {
+         multiAttrSelectMessage: 'Select phone number for sending updates',
+         multiAttrName: 'phoneNumbers',
+         multiAttr: phoneNumbers,
+         multiAttrValueName: 'value',
+         subjectName: name
+      };
+
+      return this.modalController.create({
+         component: MultiAttrPage,
+         componentProps: multiAttrProps
+      }).then((modal) => {
+         modal.present();
+         this.debugService.add("DeeplinkService.setupDeepLinkRouting: Successfully navigated to route.");
+
+         return modal.onDidDismiss().then(data => {
+            if (data.data.selectedAttr) {
+               return data.data.selectedAttr;
+            }
+         });
+      });
    }
 
    async checkForMaximumSelectedNetworkContacts(ubContacts) {

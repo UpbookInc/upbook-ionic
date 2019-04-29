@@ -26,9 +26,7 @@
       <ion-list>
          <ion-item *ngFor="let contact of displayedContacts">
             <ion-label>{{contact.name?.givenName || "[missing name]"}} {{contact.name?.familyName}}
-               <p *ngIf="contact.phoneNumbers && contact.phoneNumbers[0]?.value">{{contact.phoneNumbers[0]?.value}}</p>
-               <p *ngIf="(!contact.phoneNumbers || !contact.phoneNumbers[0]?.value) 
-                     && contact.emails && contact.emails[0]?.value">
+               <p *ngIf="contact.contactNumber && contact.contactNumber?.value">{{contact.contactNumber?.value}}</p>
             </ion-label>
             <ion-button fill="clear" slot="end" (click)="removeFromNetwork(contact)">
                <ion-icon color="danger" name="remove-circle"></ion-icon>

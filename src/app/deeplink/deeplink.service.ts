@@ -8,14 +8,8 @@ import { ContactsService } from '../contacts/contacts.service';
 import { DeltasService } from '../contacts/deltas/deltas.service';
 import { ToastService } from '../toast/toast.service';
 import { NetworkStoreService } from '../networkStore/networkStore.service';
+import { MultiAttrPage } from '../multi-attr/multi-attr.page';
 
-// DEBUG:
-// generate base64 hash of contact object with updates:
-// > btoa(JSON.stringify({"displayName":"John Bassett","phoneNumbers":[{"value":"9417163554"}], "addresses":[{"value":"2481 appalachian dr, melbourne Fl, 32939"}]}));
-// clear out phone numbers for "John Bassett" contact: 
-// > adb shell am start -a android.intent.action.VIEW -d "https://fractalstack.com/upbook/intent?updates=eyJkaXNwbGF5TmFtZSI6IkpvaG4gQmFzc2V0dCIsInBob25lTnVtYmVycyI6W119"
-// Send command to mimic link click: 
-// > adb shell am start -a android.intent.action.VIEW -d "https://fractalstack.com/upbook/intent?updates=
 @Injectable({
    providedIn: 'root'
 })
@@ -48,27 +42,66 @@ export class DeeplinkService {
       const contactWithUpdatesAndDeltas = await this.deltaService.buildContactWithDeltasAndUpdates(contactUpdates);
       console.log(contactWithUpdatesAndDeltas);
 
-      this.modalController.create({
+      const saveData = await this.modalController.create({
          component: ContactUpdatePage,
          componentProps: contactWithUpdatesAndDeltas
       }).then((modal) => {
          modal.present();
          this.debugService.add("DeeplinkService.setupDeepLinkRouting: Successfully navigated to route.");
+         return modal.onDidDismiss();
+      });
 
-         modal.onDidDismiss().then(data => {
-            if (data.data.save === true) {
-               this.toastService.presentToast('Saving contact updates, please wait...', 'secondary');
-               this.contactsService.updateContact(contactUpdates).then((updatedContact) => {
-                  if (updatedContact == undefined) {
-                     this.toastService.presentToast('Failed to save contact updates, manually update', 'danger');
+      if (saveData.data.save === true) {
+         this.toastService.presentToast('Saving contact updates, please wait...', 'secondary');
+
+         let updatedContact = await this.contactsService.updateContact(contactUpdates);
+         if (updatedContact == undefined) {
+            this.toastService.presentToast('Failed to save contact updates, manually update', 'danger');
+         } else {
+            this.toastService.presentToast('Successfully saved updates!', 'success');
+
+            let contactFromUB = await this.networkStoreService.getContactFromUBNetwork(updatedContact);
+
+            //only need to update this if we are saving them to our network
+            if (contactFromUB && contactFromUB.length > 0) {
+               //contact update was for one we have in our network
+               if (updatedContact.phoneNumbers) {
+                  if (updatedContact.phoneNumbers.length > 1) {
+                     const selectedPhoneNumber = await this.showMultiPhoneSelectionModal(updatedContact.phoneNumbers, updatedContact.name);
+                     updatedContact.contactNumber = selectedPhoneNumber;
                   } else {
-                     this.toastService.presentToast('Successfully saved updates!', 'success');
-                     // now save changes to UB network 
-                     this.networkStoreService.updateMultipleUBContacts([updatedContact]);
-                     this.networkStoreService.clearSessionDeviceContacts();
+                     updatedContact.contactNumber = updatedContact.phoneNumbers[0];
                   }
-               });
+                  // now save changes to UB network 
+                  await this.networkStoreService.updateMultipleUBContacts([updatedContact]);
+               }
             }
+
+            this.networkStoreService.clearSessionDeviceContacts();
+         }
+      }
+   }
+
+   async showMultiPhoneSelectionModal(phoneNumbers, name) {
+      const multiAttrProps = {
+         multiAttrSelectMessage: 'Select phone number for sending updates',
+         multiAttrName: 'phoneNumbers',
+         multiAttr: phoneNumbers,
+         multiAttrValueName: 'value',
+         subjectName: name
+
+      };
+
+      return this.modalController.create({
+         component: MultiAttrPage,
+         componentProps: multiAttrProps
+      }).then((modal) => {
+         modal.present();
+         return modal.onDidDismiss().then(data => {
+            if (data.data.selectedAttr) {
+               return data.data.selectedAttr;
+            }
+            return undefined;
          });
       });
    }

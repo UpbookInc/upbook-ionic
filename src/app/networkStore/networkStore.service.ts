@@ -81,7 +81,10 @@ export class NetworkStoreService {
          if (contact != null) {
             //pull out contact object from _objectInstance before saving
             if (contact["_objectInstance"] != null || contact["_objectInstance"] != undefined) {
-               return contact = <Contact>contact["_objectInstance"];
+               const contactNumber = contact.contactNumber;
+               contact = <Contact>contact["_objectInstance"];
+               contact.contactNumber = contactNumber;
+               return contact;
             } else {
                //otherwise contact object is already parsed
                return contact;
@@ -96,6 +99,7 @@ export class NetworkStoreService {
          let parsedContact = contactToParse["_objectInstance"];
          //capture all UB custom fields after parse
          parsedContact.inNetwork = contactToParse.inNetwork;
+         parsedContact.contactNumber = contactToParse.contactNumber;
          return parsedContact;
       } else {
          return contactToParse;
@@ -111,6 +115,12 @@ export class NetworkStoreService {
 
    async getUBDatabaseOfContacts(): Promise<any[]> {
       return this.storage.get(this.UB_ADDRESS_BOOK_CONTACTS_KEY);
+   }
+
+   async getContactFromUBNetwork(contactToRetrieve): Promise<any[]> {
+      let ubNetworkContacts = await this.getUBDatabaseOfContacts();
+      const contactFromUbNetwork = ubNetworkContacts.filter(netContact => netContact.id == contactToRetrieve.id);
+      return contactFromUbNetwork;
    }
 
    saveContactsToStore(contactsToSave: Contact[]) {
