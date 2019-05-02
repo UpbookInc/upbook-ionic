@@ -33,14 +33,16 @@ export class NetworkStoreService {
       // ensures the allDeviceContacts has been set.
       await this.getAllAddressbookContactsFromDevice();
 
-      this.allDeviceContacts.map(deviceCont => {
-         const inNetworkCont = ubContacts.filter(ubCont => ubCont.id === deviceCont.id);
-         if (inNetworkCont && inNetworkCont.length > 0) {
-            deviceCont.inNetwork = true;
-         } else {
-            deviceCont.inNetwork = false;
-         }
-      });
+      if (ubContacts) {
+         this.allDeviceContacts.map(deviceCont => {
+            const inNetworkCont = ubContacts.filter(ubCont => ubCont.id === deviceCont.id);
+            if (inNetworkCont && inNetworkCont.length > 0) {
+               deviceCont.inNetwork = true;
+            } else {
+               deviceCont.inNetwork = false;
+            }
+         });
+      }
    }
 
    async updateMultipleUBContacts(contactsToUpdate: Array<Contact>) {
@@ -119,8 +121,11 @@ export class NetworkStoreService {
 
    async getContactFromUBNetwork(contactToRetrieve): Promise<any[]> {
       let ubNetworkContacts = await this.getUBDatabaseOfContacts();
-      const contactFromUbNetwork = ubNetworkContacts.filter(netContact => netContact.id == contactToRetrieve.id);
-      return contactFromUbNetwork;
+      if (ubNetworkContacts) {
+         const contactFromUbNetwork = ubNetworkContacts.filter(netContact => netContact.id == contactToRetrieve.id);
+         return contactFromUbNetwork;
+      }
+      return undefined;
    }
 
    saveContactsToStore(contactsToSave: Contact[]) {

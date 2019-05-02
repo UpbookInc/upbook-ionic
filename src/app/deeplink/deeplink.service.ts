@@ -54,6 +54,7 @@ export class DeeplinkService {
       if (saveData.data.save === true) {
          this.toastService.presentToast('Saving contact updates, please wait...', 'secondary');
 
+         contactUpdates.deltas = contactWithUpdatesAndDeltas.deltas;
          let updatedContact = await this.contactsService.updateContact(contactUpdates);
          if (updatedContact == undefined) {
             this.toastService.presentToast('Failed to save contact updates, manually update', 'danger');

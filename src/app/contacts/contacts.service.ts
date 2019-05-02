@@ -23,32 +23,68 @@ export class ContactsService {
       });
    }
 
+   async performIOSContactUpdates(contactToUpdate: Contact, contactWithUpdates): Promise<any> {
+      let afterRemovedSaveContact = contactToUpdate;
+
+      if (contactWithUpdates.deltas.phoneNumbersRemoved && contactWithUpdates.deltas.phoneNumbersRemoved.length > 0) {
+         contactToUpdate.phoneNumbers = [];
+         await this.executeSave(contactToUpdate);
+         let foundContacts = await this.findContactByName(contactWithUpdates.displayName);
+         afterRemovedSaveContact = foundContacts[0];
+      }
+
+      if (contactWithUpdates.deltas.emailsRemoved && contactWithUpdates.deltas.emailsRemoved.length > 0) {
+         contactToUpdate.emails = [];
+         await this.executeSave(contactToUpdate);
+         let foundContacts = await this.findContactByName(contactWithUpdates.displayName);
+         afterRemovedSaveContact = foundContacts[0];
+      }
+
+      if (contactWithUpdates.deltas.addressesRemoved && contactWithUpdates.deltas.addressesRemoved.length > 0) {
+         contactToUpdate.addresses = [];
+         await this.executeSave(contactToUpdate);
+         let foundContacts = await this.findContactByName(contactWithUpdates.displayName);
+         afterRemovedSaveContact = foundContacts[0];
+      }
+
+      if (contactWithUpdates.deltas.orgsRemoved && contactWithUpdates.deltas.orgsRemoved.length > 0) {
+         contactToUpdate.organizations = [];
+         await this.executeSave(contactToUpdate);
+         let foundContacts = await this.findContactByName(contactWithUpdates.displayName);
+         afterRemovedSaveContact = foundContacts[0];
+      }
+
+      afterRemovedSaveContact.phoneNumbers = this.updateContactPhoneNumbers(contactWithUpdates);
+      afterRemovedSaveContact.emails = this.updateContactEmails(contactWithUpdates);
+      afterRemovedSaveContact.addresses = this.updateContactAddresses(contactWithUpdates);
+      afterRemovedSaveContact.organizations = this.updateContactOrganizations(contactWithUpdates);
+
+      return await this.executeSave(afterRemovedSaveContact);
+   }
+
    async updateContact(contactWithUpdates: Contact): Promise<any> {
       try {
-         const contactFound = await this.findContactByName(contactWithUpdates.displayName);
+         let contactFound: any = await this.findContactByName(contactWithUpdates.displayName);
          this.debugService.add("ContactsService.updateContact: Contact found");
-         // this.debugService.add(contactFound);
-         //TODO: create new contact if doesn't exist
+         //this.debugService.add(contactFound);
+
          if (contactFound != undefined && contactFound != null && contactFound.length > 0) {
+            // has to be type any to allow us direct access to _objectInstance
             let contactToUpdate: any = _.cloneDeep(contactFound[0]);
             contactToUpdate._objectInstance.rawId = contactToUpdate.rawId;
 
-            //TODO: perform checks before updating. Only update if needed.
-            //TODO: pull this save out into its own method so we can chain these save requests together 
-            contactToUpdate.phoneNumbers = [];
-            contactToUpdate.emails = [];
-            contactToUpdate.addresses = [];
-            contactToUpdate.organizations = [];
-
             if (this.currentPlatform === 'ios') {
-               contactToUpdate.phoneNumbers = this.updateContactPhoneNumbers(contactWithUpdates);
-               contactToUpdate.emails = this.updateContactEmails(contactWithUpdates);
-               contactToUpdate.addresses = this.updateContactAddresses(contactWithUpdates);
-               contactToUpdate.organizations = this.updateContactOrganizations(contactWithUpdates);
-               return this.saveChangesToContact(contactToUpdate);
+               return this.performIOSContactUpdates(contactToUpdate, contactWithUpdates);
             }
             else if (this.currentPlatform === 'android') {
-               return this.prepareContactForUpdatesForAndroid(contactToUpdate).then((preparedContact) => {
+               //TODO: perform checks before updating. Only update if needed.
+               //TODO: pull this save out into its own method so we can chain these save requests together 
+               contactToUpdate.phoneNumbers = [];
+               contactToUpdate.emails = [];
+               contactToUpdate.addresses = [];
+               contactToUpdate.organizations = [];
+
+               return this.prepareContactForUpdates(contactToUpdate).then((preparedContact) => {
                   preparedContact.phoneNumbers = this.updateContactPhoneNumbers(contactWithUpdates);
                   preparedContact.emails = this.updateContactEmails(contactWithUpdates);
                   preparedContact.addresses = this.updateContactAddresses(contactWithUpdates);
@@ -61,6 +97,8 @@ export class ContactsService {
       catch (error) {
          this.debugService.add("ContactsService.updateContact: Error finding contacts.");
          this.debugService.add(error);
+         console.log("error saving");
+         console.log(error);
          return Promise.reject(undefined);
       }
    }
@@ -70,8 +108,8 @@ export class ContactsService {
 
       contactWithUpdates.phoneNumbers.map((numToAdd, index) => {
          if (this.currentPlatform === 'ios') {
-            //TODO: this needs to have the id of the specific phone number array to work.  Otherwise, it will
-            //just add a new number
+            //TODO: this needs to have the id of the specific phone number array to work.  
+            // Otherwise, it will just add a new number
             contactNumUpdates.push({ id: index, value: numToAdd.value });
          } else if (this.currentPlatform === 'android') {
             contactNumUpdates.push(new ContactField('', numToAdd.value, false));
@@ -95,7 +133,7 @@ export class ContactsService {
    }
 
    updateContactAddresses(contactWithUpdates) {
-      var contactAddrUpdates = [];
+      let contactAddrUpdates = [];
       contactWithUpdates.addresses.map((addrToAdd, index) => {
          if (this.currentPlatform === 'ios') {
             //TODO: this needs to have the id of the specific phone number array to work.  Otherwise, it will
@@ -123,9 +161,9 @@ export class ContactsService {
       return contactOrgUpdates;
    }
 
-   async prepareContactForUpdatesForAndroid(contactToUpdate): Promise<any> {
+   async prepareContactForUpdates(contactToUpdate): Promise<any> {
       try {
-         const contactAfterPhoneNumsCleared = await this.executeSave(contactToUpdate);
+         let contactAfterPhoneNumsCleared = await this.executeSave(contactToUpdate);
          return contactAfterPhoneNumsCleared;
       } catch (error) {
          this.debugService.add("ContactsService.updateContact: Contact update to clear out phone numbers failed");
@@ -200,7 +238,7 @@ export class ContactsService {
 
    async saveChangesToContact(contactToUpdate): Promise<any> {
       try {
-         const contactAfterSave = await this.executeSave(contactToUpdate)
+         let contactAfterSave = await this.executeSave(contactToUpdate)
          this.debugService.add("ContactsService.updateContact: Contact updates saved.");
          return contactAfterSave;
       } catch (error) {
@@ -215,7 +253,7 @@ export class ContactsService {
    //    this.executeSave(contactToSave);
    // }
 
-   private async executeSave(contactToSave): Promise<Contact> {
+   private async executeSave(contactToSave: Contact): Promise<Contact> {
       return contactToSave.save();
    }
 
