@@ -115,6 +115,12 @@ export class DeltasService {
    }
 
    private determineOrgDeltas(contactWithUpdates, contactToUpdate) {
+      // removes the empty organaiztion that iOS always has when none is set
+      if (contactToUpdate.organizations && contactToUpdate.organizations.length === 1 
+         && (!contactToUpdate.organizations[0].name || contactToUpdate.organizations[0].name == '')) {
+            contactToUpdate.organizations = [];
+      }
+
       if (contactWithUpdates.organizations && contactWithUpdates.organizations.length > 0) {
          var addedItems = contactWithUpdates.organizations;
          if (contactToUpdate.organizations && contactToUpdate.organizations.length > 0) {
