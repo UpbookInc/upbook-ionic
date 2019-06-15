@@ -37,13 +37,17 @@ export class ProfileService {
          let contactsWithNumbers = inNetworkContacts.filter(netCont => netCont.phoneNumbers
             && netCont.phoneNumbers[0] && netCont.phoneNumbers[0].value);
 
-         // NOTE: just grabs the in-network contact's first number to use for sending message.
+         // Currently this sends to ALL numbers, even though we still prompt user select text number
          // TODO: eventually may need to select main or preferred number
-         var inNetworkContactNumbers = contactsWithNumbers.map(contactFromInNetwork => {
-            if (contactFromInNetwork.phoneNumbers && contactFromInNetwork.phoneNumbers[0]
-               && contactFromInNetwork.phoneNumbers[0].value) {
-               return contactFromInNetwork.phoneNumbers[0].value;
-            }
+         var inNetworkContactNumbers:string[] = []
+         contactsWithNumbers.map(contactFromInNetwork => {
+            if (contactFromInNetwork.phoneNumbers) {
+               contactFromInNetwork.phoneNumbers.map(number => {
+                  if (number.value) {
+                     inNetworkContactNumbers.push(number.value);
+                  }
+               });
+            } 
          });
 
          var normalizedInNetworkNumbersFromDevice = this.contactService.normalizePhoneNumberAsStringArray(inNetworkContactNumbers);
