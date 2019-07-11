@@ -64,7 +64,8 @@ export class ContactsService {
 
    async updateContact(contactWithUpdates: Contact): Promise<any> {
       try {
-         let contactFound: any = await this.findContactByName(contactWithUpdates.displayName);
+         let contactFound: any = await this.findContactByNameThenNumber(contactWithUpdates);
+
          this.debugService.add("ContactsService.updateContact: Contact found");
          //this.debugService.add(contactFound);
 
@@ -172,10 +173,46 @@ export class ContactsService {
       }
    }
 
+   async findContactByNameThenNumber(contactWithUpdates): Promise<Contact[]> {
+      let contactFound = await this.findContactByName(contactWithUpdates.displayName);
+      if (!contactFound[0]) {
+         let contactToReturn;
+         // name didn't match, try phone numbers
+         if (contactWithUpdates.phoneNumbers) {
+            
+            let contactsFoundFromNumber: any[] = [];
+            // used a for..of loop here that each query runs in series.  The Cordova Contacts query
+            // doesn't seem to work when done in parallel.  
+            for (var number of contactWithUpdates.phoneNumbers) {
+               let contactFromQuery = await this.findContactByNumber(number.value);
+               if (contactFromQuery && contactFromQuery.length > 0) {
+                  contactsFoundFromNumber.push(contactFromQuery[0]);
+               }
+            }
+
+            contactToReturn = contactsFoundFromNumber.filter(contactFound => contactFound);
+            return contactToReturn;
+         }
+      } else {
+         return contactFound;
+      }
+   }
+
    async findContactByName(nameToSearch: string): Promise<Contact[]> {
       var opts = {
          filter: nameToSearch,
          multiple: false,
+         desiredFields: ['displayName', 'name', 'phoneNumbers', 'addresses', 'emails', 'organizations']
+      };
+      return this.performDeviceContactQuery(opts);
+   }
+
+   async findContactByNumber(numberToSearch: string): Promise<Contact[]> {
+      console.log("findContactByNumber");
+      var opts = {
+         filter: numberToSearch,
+         multiple: false,
+         hasPhoneNumber: true,
          desiredFields: ['displayName', 'name', 'phoneNumbers', 'addresses', 'emails', 'organizations']
       };
       return this.performDeviceContactQuery(opts);

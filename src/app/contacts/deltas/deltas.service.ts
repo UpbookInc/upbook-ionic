@@ -14,7 +14,8 @@ export class DeltasService {
 
    async buildContactWithDeltasAndUpdates(contactWithUpdates): Promise<Contact> {
       try {
-         const contactFound = await this.contactService.findContactByName(contactWithUpdates.displayName);
+         const contactFound = await this.contactService.findContactByNameThenNumber(contactWithUpdates);
+
          this.debugService.add("ContactsService.buildContactWithUpdates: Contact found");
 
          if (contactFound[0]) {
@@ -116,9 +117,9 @@ export class DeltasService {
 
    private determineOrgDeltas(contactWithUpdates, contactToUpdate) {
       // removes the empty organaiztion that iOS always has when none is set
-      if (contactToUpdate.organizations && contactToUpdate.organizations.length === 1 
+      if (contactToUpdate.organizations && contactToUpdate.organizations.length === 1
          && (!contactToUpdate.organizations[0].name || contactToUpdate.organizations[0].name == '')) {
-            contactToUpdate.organizations = [];
+         contactToUpdate.organizations = [];
       }
 
       if (contactWithUpdates.organizations && contactWithUpdates.organizations.length > 0) {
