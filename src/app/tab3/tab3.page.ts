@@ -60,13 +60,13 @@ export class Tab3Page {
    //    }
    // }
 
-   private generateRandomString(length) {
-      var text = "";
-      var possible = "abcdefghijklmnopqrstuvwxyz";
+   // private generateRandomString(length) {
+   //    var text = "";
+   //    var possible = "abcdefghijklmnopqrstuvwxyz";
 
-      for (var i = 0; i < length; i++)
-         text += possible.charAt(Math.floor(Math.random() * possible.length));
+   //    for (var i = 0; i < length; i++)
+   //       text += possible.charAt(Math.floor(Math.random() * possible.length));
 
-      return text;
-   }
+   //    return text;
+   // }
 }

@@ -8,7 +8,6 @@ import { ContactsService } from '../contacts/contacts.service';
 import { DeltasService } from '../contacts/deltas/deltas.service';
 import { ToastService } from '../toast/toast.service';
 import { NetworkStoreService } from '../networkStore/networkStore.service';
-import { MultiAttrPage } from '../multi-attr/multi-attr.page';
 
 @Injectable({
    providedIn: 'root'
@@ -59,52 +58,26 @@ export class DeeplinkService {
          if (updatedContact == undefined) {
             this.toastService.presentToast('Failed to save contact updates, manually update', 'danger');
          } else {
-            this.toastService.presentToast('Successfully saved updates!', 'success');
-
             let contactFromUB = await this.networkStoreService.getContactFromUBNetwork(updatedContact);
 
             //only need to update this if we are saving them to our network
             if (contactFromUB && contactFromUB.length > 0) {
                //contact update was for one we have in our network
                if (updatedContact.phoneNumbers) {
-                  if (updatedContact.phoneNumbers.length > 1) {
-                     const selectedPhoneNumber = await this.showMultiPhoneSelectionModal(updatedContact.phoneNumbers, updatedContact.name);
-                     updatedContact.contactNumber = selectedPhoneNumber;
-                  } else {
-                     updatedContact.contactNumber = updatedContact.phoneNumbers[0];
-                  }
+                  // Save the first number just to capture one so we have something to display.
+                  // We currently send a message to all numbers, if this changes, we'll have to move back
+                  // to selecting a specific number.
+                  updatedContact.contactNumber = updatedContact.phoneNumbers[0];
+
                   // now save changes to UB network 
                   await this.networkStoreService.updateMultipleUBContacts([updatedContact]);
+                  this.toastService.presentToast('Successfully saved updates!', 'success');
                }
             }
 
             this.networkStoreService.clearSessionDeviceContacts();
          }
       }
-   }
-
-   async showMultiPhoneSelectionModal(phoneNumbers, name) {
-      const multiAttrProps = {
-         multiAttrSelectMessage: 'Select phone number for sending updates',
-         multiAttrName: 'phoneNumbers',
-         multiAttr: phoneNumbers,
-         multiAttrValueName: 'value',
-         subjectName: name
-
-      };
-
-      return this.modalController.create({
-         component: MultiAttrPage,
-         componentProps: multiAttrProps
-      }).then((modal) => {
-         modal.present();
-         return modal.onDidDismiss().then(data => {
-            if (data.data.selectedAttr) {
-               return data.data.selectedAttr;
-            }
-            return undefined;
-         });
-      });
    }
 
    parseContactQueryString(queryStringWithUpdates) {
