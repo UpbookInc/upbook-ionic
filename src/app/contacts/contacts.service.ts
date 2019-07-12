@@ -234,7 +234,7 @@ export class ContactsService {
 
    private async performDeviceContactQuery(options): Promise<Contact[]> {
       try {
-         const contactsFound = await this.contacts.find(['*'], options);
+         const contactsFound = await this.contacts.find(['displayName', 'name', 'phoneNumbers', 'addresses', 'emails', 'organizations'], options);
          this.debugService.add("ContactsService.performDeviceContactQuery: contact(s) found.");
          let contactsFoundCloned = _.cloneDeep(contactsFound);
          return contactsFoundCloned;
