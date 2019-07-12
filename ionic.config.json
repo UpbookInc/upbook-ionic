@@ -1,6 +1,8 @@
 {
   "name": "upbook",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "angular",
   "id": "941f522b"
 }

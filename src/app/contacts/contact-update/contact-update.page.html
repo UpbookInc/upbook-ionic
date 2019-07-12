@@ -1,0 +1,128 @@
+<ion-header>
+   <ion-toolbar>
+      <ion-title>Review Contact Updates</ion-title>
+      <ion-buttons slot="secondary" (click)="cancel()">
+         <ion-button>
+            Close
+         </ion-button>
+      </ion-buttons>
+   </ion-toolbar>
+</ion-header>
+
+<ion-content>
+   <ion-card>
+      <ion-card-header>
+         <ion-card-title>{{displayName}}</ion-card-title>
+         <ion-card-subtitle *ngIf="updateNeeded === false && contactNotFound !== true">
+            No updates to perform
+         </ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-header *ngIf="updateNeeded === true">
+         <ion-card-subtitle color="primary">Contact Changes</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+         <ion-list>
+            <ion-item *ngFor="let phNumAdded of contactDeltas?.addedPhoneNumbers">
+               <ion-icon name="add" color="success"></ion-icon> {{phNumAdded.value}}
+            </ion-item>
+            <ion-item *ngFor="let addedEmail of contactDeltas?.addedEmails">
+               <ion-icon name="add" color="success"></ion-icon> {{addedEmail.value}}
+            </ion-item>
+            <ion-item *ngFor="let addedAddr of contactDeltas?.addedAddresses">
+               <ion-icon name="add" color="success"></ion-icon> {{addedAddr.streetAddress}}
+            </ion-item>
+            <ion-item *ngFor="let addedOrg of contactDeltas?.addedOrgs">
+               <ion-icon name="add" color="success"></ion-icon> {{addedOrg.name}}
+            </ion-item>
+         </ion-list>
+         <ion-list>
+            <ion-item *ngFor="let phNumRemoved of contactDeltas?.phoneNumbersRemoved">
+               <ion-icon name="remove" color="danger"></ion-icon> {{phNumRemoved.value}}
+            </ion-item>
+            <ion-item *ngFor="let removedEmail of contactDeltas?.emailsRemoved">
+               <ion-icon name="remove" color="danger"></ion-icon> {{removedEmail.value}}
+            </ion-item>
+            <ion-item *ngFor="let addrRemoved of contactDeltas?.addressesRemoved">
+               <ion-icon name="remove" color="danger"></ion-icon> {{addrRemoved.streetAddress}}
+            </ion-item>
+            <ion-item *ngFor="let removedOrg of contactDeltas?.orgsRemoved">
+               <ion-icon name="remove" color="danger"></ion-icon> {{removedOrg.name}}
+            </ion-item>
+         </ion-list>
+      </ion-card-content>
+   </ion-card>
+
+   <ion-card *ngIf="updateNeeded === true">
+      <ion-card-header>
+         <ion-card-subtitle>Contact Changes Look Like</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+         <ion-grid>
+            <ion-row>
+               <ion-col *ngFor="let phNum of contact?.phoneNumbers" size="12">
+                  <ion-input value="{{phNum.value}}" readonly></ion-input>
+               </ion-col>
+            </ion-row>
+            <ion-row>
+               <ion-col *ngFor="let email of contact?.emails" size="12">
+                  <ion-input value="{{email.value}}" readonly></ion-input>
+               </ion-col>
+            </ion-row>
+            <ion-row>
+               <ion-col *ngFor="let addr of contact?.addresses" size="12">
+                  <ion-input value="{{addr.streetAddress}}" readonly></ion-input>
+               </ion-col>
+            </ion-row>
+            <ion-row>
+               <ion-col *ngFor="let org of contact?.organizations" size="12">
+                  <ion-input value="{{org.name}}" readonly></ion-input>
+               </ion-col>
+            </ion-row>
+         </ion-grid>
+      </ion-card-content>
+   </ion-card>
+
+   <ion-card *ngIf="contactNotFound === true">
+      <ion-card-header>
+         <ion-card-subtitle>
+            Contact Not Found, Perform Updates Manually
+         </ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+         <ion-grid>
+            <ion-row>
+               <small>Phone Numbers</small>
+               <ion-col *ngFor="let phNum of contact?.phoneNumbers" size="12">
+                  <ion-input value="{{phNum.value}}" readonly></ion-input>
+               </ion-col>
+            </ion-row>
+            <ion-row>
+               <small>Emails</small>
+               <ion-col *ngFor="let email of contact?.emails" size="12">
+                  <ion-input value="{{email.value}}" readonly></ion-input>
+               </ion-col>
+            </ion-row>
+            <ion-row>
+               <small>Addresses</small>
+               <ion-col *ngFor="let addr of contact?.addresses" size="12">
+                  <ion-input value="{{addr.streetAddress}}" readonly></ion-input>
+               </ion-col>
+            </ion-row>
+            <ion-row>
+               <small>Organizations</small>
+               <ion-col *ngFor="let org of contact?.organizations" size="12">
+                  <ion-input value="{{org.name}}" readonly></ion-input>
+               </ion-col>
+            </ion-row>
+         </ion-grid>
+      </ion-card-content>
+   </ion-card>
+</ion-content>
+<ion-footer *ngIf="updateNeeded === true">
+   <ion-toolbar>
+      <ion-buttons slot="end">
+         <ion-button (click)="cancel()" color="default">Cancel</ion-button>
+         <ion-button (click)="save()" color="success">Save Updates</ion-button>
+      </ion-buttons>
+   </ion-toolbar>
+</ion-footer>
