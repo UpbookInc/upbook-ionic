@@ -1,0 +1,45 @@
+<ion-header>
+   <ion-toolbar>
+      <ion-title>My Network</ion-title>
+   </ion-toolbar>
+   <ion-toolbar>
+      <ion-item>
+         <ion-text class="ion-text-center">
+            Send profile to network
+         </ion-text>
+         <ion-button (click)="sendProfileToNetwork()"
+            [disabled]="sending === true || !displayedContacts || displayedContacts.length < 1" size="default"
+            fill="outline" slot="end" type="submit">
+            <ion-icon color="primary" name="send"></ion-icon>
+         </ion-button>
+      </ion-item>
+   </ion-toolbar>
+</ion-header>
+
+<ion-content>
+   <ion-button [disabled]="sending === true || !displayedContacts || displayedContacts.length < 1"
+      (click)="clearNetworkSelections()" fill="clear" size="small" type="submit">
+      <ion-text color="danger">Clear Network</ion-text>
+   </ion-button>
+   <ion-card>
+      <div *ngIf="sending === true" class="spinner-container">
+         <ion-spinner></ion-spinner>
+      </div>
+      <ion-list>
+         <ion-item *ngFor="let contact of displayedContacts">
+            <ion-label>{{contact.name?.givenName || "[missing name]"}} {{contact.name?.familyName}}
+               <p *ngIf="contact.contactNumber && contact.contactNumber?.value">{{contact.contactNumber?.value}}</p>
+            </ion-label>
+            <ion-button fill="clear" slot="end" (click)="removeFromNetwork(contact)">
+               <ion-icon color="danger" name="remove-circle"></ion-icon>
+            </ion-button>
+         </ion-item>
+         <ion-item *ngIf="!displayedContacts || displayedContacts.length < 1">
+            <ion-text class="ion-text-center">
+               <h3>No Network Contacts</h3>
+               <p>Use Contacts tab to make Network selections</p>
+            </ion-text>
+         </ion-item>
+      </ion-list>
+   </ion-card>
+</ion-content>
