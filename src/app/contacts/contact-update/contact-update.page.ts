@@ -11,12 +11,14 @@ export class ContactUpdatePage {
    contactUpdates;
    contactDeltas;
    updateNeeded;
+   contactNotFound;
    displayName;
    contact: any;
 
    constructor(private modalController: ModalController, private navParams: NavParams) {
       //TODO: null checks
       this.updateNeeded = navParams.data.updateNeeded;
+      this.contactNotFound = navParams.data.contactNotFound;
       this.contact = {};
       if (navParams.data._objectInstance.name) {
          this.displayName = navParams.data._objectInstance.name.givenName + ' ' + navParams.data._objectInstance.name.familyName;

@@ -179,14 +179,20 @@ export class ContactsService {
          let contactToReturn;
          // name didn't match, try phone numbers
          if (contactWithUpdates.phoneNumbers) {
-            
+
             let contactsFoundFromNumber: any[] = [];
             // used a for..of loop here that each query runs in series.  The Cordova Contacts query
             // doesn't seem to work when done in parallel.  
             for (var number of contactWithUpdates.phoneNumbers) {
                let contactFromQuery = await this.findContactByNumber(number.value);
                if (contactFromQuery && contactFromQuery.length > 0) {
-                  contactsFoundFromNumber.push(contactFromQuery[0]);
+                  // prevent adding duplicate contacts
+                  let contactExists: boolean = contactsFoundFromNumber.some(contactFoundFromNumber => {
+                     return contactFoundFromNumber.id === contactFromQuery[0].id;
+                  });
+                  if (!contactExists) {
+                     contactsFoundFromNumber.push(contactFromQuery[0]);
+                  }
                }
             }
 

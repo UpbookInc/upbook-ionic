@@ -13,7 +13,7 @@
    <ion-card>
       <ion-card-header>
          <ion-card-title>{{displayName}}</ion-card-title>
-         <ion-card-subtitle *ngIf="updateNeeded === false">
+         <ion-card-subtitle *ngIf="updateNeeded === false && contactNotFound !== true">
             No updates to perform
          </ion-card-subtitle>
       </ion-card-header>
@@ -74,6 +74,42 @@
                </ion-col>
             </ion-row>
             <ion-row>
+               <ion-col *ngFor="let org of contact?.organizations" size="12">
+                  <ion-input value="{{org.name}}" readonly></ion-input>
+               </ion-col>
+            </ion-row>
+         </ion-grid>
+      </ion-card-content>
+   </ion-card>
+
+   <ion-card *ngIf="contactNotFound === true">
+      <ion-card-header>
+         <ion-card-subtitle>
+            Contact Not Found, Perform Updates Manually
+         </ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+         <ion-grid>
+            <ion-row>
+               <small>Phone Numbers</small>
+               <ion-col *ngFor="let phNum of contact?.phoneNumbers" size="12">
+                  <ion-input value="{{phNum.value}}" readonly></ion-input>
+               </ion-col>
+            </ion-row>
+            <ion-row>
+               <small>Emails</small>
+               <ion-col *ngFor="let email of contact?.emails" size="12">
+                  <ion-input value="{{email.value}}" readonly></ion-input>
+               </ion-col>
+            </ion-row>
+            <ion-row>
+               <small>Addresses</small>
+               <ion-col *ngFor="let addr of contact?.addresses" size="12">
+                  <ion-input value="{{addr.streetAddress}}" readonly></ion-input>
+               </ion-col>
+            </ion-row>
+            <ion-row>
+               <small>Organizations</small>
                <ion-col *ngFor="let org of contact?.organizations" size="12">
                   <ion-input value="{{org.name}}" readonly></ion-input>
                </ion-col>

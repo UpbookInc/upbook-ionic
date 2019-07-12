@@ -46,11 +46,16 @@ export class DeltasService {
             return contactToUpdate;
          }
          else {
-            // TODO: contact not found on device, create new one? 
             // For now just mimic contact object and set to update not needed
-            const emptyContact = new Contact();
+            const emptyContact = new Contact();// contactWithUpdates;
             emptyContact.displayName = contactWithUpdates.displayName;
+            emptyContact.phoneNumbers = contactWithUpdates.phoneNumbers;
+            emptyContact.emails = contactWithUpdates.emails;
+            emptyContact.addresses = contactWithUpdates.addresses;
+            emptyContact.organizations = contactWithUpdates.organizations;
+
             emptyContact.updateNeeded = false;
+            emptyContact.contactNotFound = true;
             return emptyContact;
          }
       }
