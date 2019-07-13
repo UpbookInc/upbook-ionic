@@ -29,28 +29,28 @@ export class ContactsService {
       if (contactWithUpdates.deltas.phoneNumbersRemoved && contactWithUpdates.deltas.phoneNumbersRemoved.length > 0) {
          contactToUpdate.phoneNumbers = [];
          await this.executeSave(contactToUpdate);
-         let foundContacts = await this.findContactByName(contactWithUpdates.displayName);
+         let foundContacts = await this.findContactById(contactToUpdate.id);
          afterRemovedSaveContact = foundContacts[0];
       }
 
       if (contactWithUpdates.deltas.emailsRemoved && contactWithUpdates.deltas.emailsRemoved.length > 0) {
          contactToUpdate.emails = [];
          await this.executeSave(contactToUpdate);
-         let foundContacts = await this.findContactByName(contactWithUpdates.displayName);
+         let foundContacts = await this.findContactById(contactToUpdate.id);
          afterRemovedSaveContact = foundContacts[0];
       }
 
       if (contactWithUpdates.deltas.addressesRemoved && contactWithUpdates.deltas.addressesRemoved.length > 0) {
          contactToUpdate.addresses = [];
          await this.executeSave(contactToUpdate);
-         let foundContacts = await this.findContactByName(contactWithUpdates.displayName);
+         let foundContacts = await this.findContactById(contactToUpdate.id);
          afterRemovedSaveContact = foundContacts[0];
       }
 
       if (contactWithUpdates.deltas.orgsRemoved && contactWithUpdates.deltas.orgsRemoved.length > 0) {
          contactToUpdate.organizations = [];
          await this.executeSave(contactToUpdate);
-         let foundContacts = await this.findContactByName(contactWithUpdates.displayName);
+         let foundContacts = await this.findContactById(contactToUpdate.id);
          afterRemovedSaveContact = foundContacts[0];
       }
 
@@ -175,7 +175,7 @@ export class ContactsService {
 
    async findContactByNameThenNumber(contactWithUpdates): Promise<Contact[]> {
       let contactFound = await this.findContactByName(contactWithUpdates.displayName);
-      if (!contactFound[0]) {
+      if (!contactFound || !contactFound[0]) {
          let contactToReturn;
          // name didn't match, try phone numbers
          if (contactWithUpdates.phoneNumbers) {
@@ -204,37 +204,52 @@ export class ContactsService {
       }
    }
 
-   async findContactByName(nameToSearch: string): Promise<Contact[]> {
+   private async findContactById(idToSearch: string): Promise<Contact[]> {
+      var opts = {
+         filter: idToSearch,
+         multiple: false,
+         desiredFields: ['displayName', 'name', 'phoneNumbers', 'addresses', 'emails', 'organizations', 'id']
+      };
+      return this.performDeviceContactQuery(opts, ['id']);
+   }
+
+   /*
+    * Do not use directly, use findContactByNameThenNumber 
+    */
+   private async findContactByName(nameToSearch: string): Promise<Contact[]> {
       var opts = {
          filter: nameToSearch,
          multiple: false,
-         desiredFields: ['displayName', 'name', 'phoneNumbers', 'addresses', 'emails', 'organizations']
+         desiredFields: ['displayName', 'name', 'phoneNumbers', 'addresses', 'emails', 'organizations', 'id']
       };
-      return this.performDeviceContactQuery(opts);
+      return this.performDeviceContactQuery(opts, ['displayName', 'name']);
    }
 
-   async findContactByNumber(numberToSearch: string): Promise<Contact[]> {
+   /*
+    * Do not use directly, use findContactByNameThenNumber 
+    */
+   private async findContactByNumber(numberToSearch: string): Promise<Contact[]> {
       console.log("findContactByNumber");
       var opts = {
          filter: numberToSearch,
          multiple: false,
          hasPhoneNumber: true,
-         desiredFields: ['displayName', 'name', 'phoneNumbers', 'addresses', 'emails', 'organizations']
+         desiredFields: ['displayName', 'name', 'phoneNumbers', 'addresses', 'emails', 'organizations', 'id']
       };
-      return this.performDeviceContactQuery(opts);
+      return this.performDeviceContactQuery(opts, ['phoneNumbers']);
    }
 
    async queryAllDeviceContacts(): Promise<Contact[]> {
       var opts = {
          multiple: true,
-         desiredFields: ['displayName', 'name', 'phoneNumbers', 'addresses', 'emails', 'organizations']
+         desiredFields: ['displayName', 'name', 'phoneNumbers', 'addresses', 'emails', 'organizations', 'id']
       };
-      return this.performDeviceContactQuery(opts);
+      return this.performDeviceContactQuery(opts, ['*']);
    }
 
-   private async performDeviceContactQuery(options): Promise<Contact[]> {
+   private async performDeviceContactQuery(options, queryFields): Promise<Contact[]> {
       try {
-         const contactsFound = await this.contacts.find(['displayName', 'name', 'phoneNumbers', 'addresses', 'emails', 'organizations'], options);
+         const contactsFound = await this.contacts.find(queryFields, options);
          this.debugService.add("ContactsService.performDeviceContactQuery: contact(s) found.");
          let contactsFoundCloned = _.cloneDeep(contactsFound);
          return contactsFoundCloned;
