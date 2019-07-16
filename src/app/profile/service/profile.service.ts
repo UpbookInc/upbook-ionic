@@ -11,8 +11,6 @@ import { ContactsService } from 'src/app/contacts/contacts.service';
 })
 export class ProfileService {
 
-   static upbookSendMessageApi = 'https://lwf23x3o1i.execute-api.us-east-1.amazonaws.com/default/UpbookAPISMS-1';
-
    private readonly UB_PROFILE_KEY = 'UB_PROFILE';
 
    constructor(public storage: Storage, private http: HTTP, private debugService: DebugService, private networkStoreService: NetworkStoreService,
@@ -63,7 +61,7 @@ export class ProfileService {
          profileToSend.profile = convertedProfileToContactFormat;
          profileToSend.networkNumbers = normalizedInNetworkNumbersFromDevice;
 
-         this.http.post(ProfileService.upbookSendMessageApi,
+         this.http.post(this.getApi(),
             profileToSend,
             {})
             .then((data) => {
@@ -123,5 +121,9 @@ export class ProfileService {
       } else {
          return true;
       }
+   }
+
+   getApi() {
+      return 'https://lwf23x3o1i.execute-api.us-east-1.amazonaws.com/default/UpbookAPISMS-1';
    }
 }

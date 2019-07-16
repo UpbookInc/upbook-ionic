@@ -18,7 +18,8 @@ export class DeeplinkService {
 
    constructor(protected deeplinks: Deeplinks, protected navController: NavController, private zone: NgZone,
       private debugService: DebugService, private modalController: ModalController, private contactsService: ContactsService,
-      public toastService: ToastService, private deltaService: DeltasService, private networkStoreService: NetworkStoreService, private http: HTTP) { }
+      public toastService: ToastService, private deltaService: DeltasService, private networkStoreService: NetworkStoreService, private http: HTTP,
+      private profileService: ProfileService) { }
 
    setupDeepLinkRouting() {
       this.deeplinks.route({
@@ -86,7 +87,7 @@ export class DeeplinkService {
 
    private async requestProfileData(profileId) {
       var dataId = { dataId: profileId };
-      var profileData = await this.http.get(ProfileService.upbookSendMessageApi,
+      var profileData = await this.http.get(this.profileService.getApi(),
          dataId,
          {})
          .then((data) => {
