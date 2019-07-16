@@ -233,13 +233,13 @@ export class ContactsService {
       if (this.currentPlatform === 'ios') {
          // required format (XXX) YYY-ZZZZ
          numberToSearch = this.convertPhoneNumberToStandardFormatExcludeCountry(numberToSearch);
-         console.log("ios formatted: " + numberToSearch);
+         // console.log("ios formatted: " + numberToSearch);
       } else if (this.currentPlatform === 'android') {
          // add wildcards XXX%YYY%ZZZZ
          var numberArray = this.normalizePhoneNumberAsStringArray([numberToSearch]);
          numberToSearch = numberArray[0];
          numberToSearch = numberToSearch.slice(0, 3) + "%" + numberToSearch.slice(3, 6) + "%" + numberToSearch.slice(6);
-         console.log("android formatted: " + numberToSearch);
+         // console.log("android formatted: " + numberToSearch);
       }
 
       var opts = {

@@ -6,12 +6,12 @@ import { DebugService } from 'src/app/debug/debug.service';
 import { NetworkStoreService } from 'src/app/networkStore/networkStore.service';
 import { ContactsService } from 'src/app/contacts/contacts.service';
 
-const upbookSendMessageApi = 'https://lwf23x3o1i.execute-api.us-east-1.amazonaws.com/default/UpbookAPISMS-1';
-
 @Injectable({
    providedIn: 'root'
 })
 export class ProfileService {
+
+   static upbookSendMessageApi = 'https://lwf23x3o1i.execute-api.us-east-1.amazonaws.com/default/UpbookAPISMS-1';
 
    private readonly UB_PROFILE_KEY = 'UB_PROFILE';
 
@@ -63,7 +63,7 @@ export class ProfileService {
          profileToSend.profile = convertedProfileToContactFormat;
          profileToSend.networkNumbers = normalizedInNetworkNumbersFromDevice;
 
-         this.http.post(upbookSendMessageApi,
+         this.http.post(ProfileService.upbookSendMessageApi,
             profileToSend,
             {})
             .then((data) => {

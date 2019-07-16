@@ -8,6 +8,8 @@ import { ContactsService } from '../contacts/contacts.service';
 import { DeltasService } from '../contacts/deltas/deltas.service';
 import { ToastService } from '../toast/toast.service';
 import { NetworkStoreService } from '../networkStore/networkStore.service';
+import { HTTP } from '@ionic-native/http/ngx';
+import { ProfileService } from '../profile/service/profile.service';
 
 @Injectable({
    providedIn: 'root'
@@ -16,7 +18,7 @@ export class DeeplinkService {
 
    constructor(protected deeplinks: Deeplinks, protected navController: NavController, private zone: NgZone,
       private debugService: DebugService, private modalController: ModalController, private contactsService: ContactsService,
-      public toastService: ToastService, private deltaService: DeltasService, private networkStoreService: NetworkStoreService) { }
+      public toastService: ToastService, private deltaService: DeltasService, private networkStoreService: NetworkStoreService, private http: HTTP) { }
 
    setupDeepLinkRouting() {
       this.deeplinks.route({
@@ -34,9 +36,12 @@ export class DeeplinkService {
    async contactUpdateIntentMatch(match) {
       this.debugService.add("DeeplinkService.setupDeepLinkRouting: Successfully matched route:");
       this.debugService.add(match);
+      this.toastService.presentToast('Processing contact update, please wait...', 'secondary');
 
       // parse raw query string into update object
-      var contactUpdates = this.parseContactQueryString(match.$link.queryString);
+      var profileDataId = this.parseContactQueryString(match.$link.queryString);
+      var rawProfileData = await this.requestProfileData(profileDataId)
+      var contactUpdates = this.parseProfileData(rawProfileData);
 
       const contactWithUpdatesAndDeltas = await this.deltaService.buildContactWithDeltasAndUpdates(contactUpdates);
       console.log(contactWithUpdatesAndDeltas);
@@ -79,11 +84,32 @@ export class DeeplinkService {
       }
    }
 
+   private async requestProfileData(profileId) {
+      var dataId = { dataId: profileId };
+      var profileData = await this.http.get(ProfileService.upbookSendMessageApi,
+         dataId,
+         {})
+         .then((data) => {
+            this.debugService.add("DeeplinkService.sendProfileToNetwork: http success");
+            return data;
+         }, (errorData) => {
+            this.debugService.add("DeeplinkService.sendProfileToNetwork: http error");
+            this.toastService.presentToast('Contact data unavailable. Have contact resend profile.', 'danger');
+            return Promise.reject(undefined);
+         });
+      return profileData;
+   }
+
    parseContactQueryString(queryStringWithUpdates) {
       var searchParams = new URLSearchParams(queryStringWithUpdates);
-      var base64ContactUpdates = searchParams.get('updates');
-      var decodedUpdate = atob(base64ContactUpdates);
-      // console.log(decodedUpdate);
+      return searchParams.get('updates');
+   }
+
+   parseProfileData(rawProfileData) {
+      var dataFromRequest = rawProfileData.data;
+      var jsonProfileData = JSON.parse(dataFromRequest);
+      var decodedUpdate = atob(jsonProfileData.data);
+      console.log(decodedUpdate);
       var decodedAndParsedContactUpdates = JSON.parse(decodedUpdate);
       return decodedAndParsedContactUpdates;
    }
