@@ -64,7 +64,7 @@ export class ContactsService {
 
    async updateContact(contactWithUpdates: Contact): Promise<any> {
       try {
-         let contactFound: any = await this.findContactByNameThenNumber(contactWithUpdates);
+         let contactFound: any = await this.findContactById(contactWithUpdates.id);
 
          this.debugService.add("ContactsService.updateContact: Contact found");
          //this.debugService.add(contactFound);
@@ -108,12 +108,13 @@ export class ContactsService {
       var contactNumUpdates = [];
 
       contactWithUpdates.phoneNumbers.map((numToAdd, index) => {
+         var numToSave = this.convertPhoneNumberToStandardFormatWithCountry(numToAdd.value);
          if (this.currentPlatform === 'ios') {
             //TODO: this needs to have the id of the specific phone number array to work.  
             // Otherwise, it will just add a new number
-            contactNumUpdates.push({ id: index, value: numToAdd.value });
+            contactNumUpdates.push({ id: index, value: numToSave });
          } else if (this.currentPlatform === 'android') {
-            contactNumUpdates.push(new ContactField('', numToAdd.value, false));
+            contactNumUpdates.push(new ContactField('', numToSave, false));
          }
       });
       return contactNumUpdates;
@@ -176,6 +177,11 @@ export class ContactsService {
    async findContactByNameThenNumber(contactWithUpdates): Promise<Contact[]> {
       let contactFound = await this.findContactByName(contactWithUpdates.displayName);
       if (!contactFound || !contactFound[0]) {
+         //try again with last name first
+         contactFound = await this.findContactByName(contactWithUpdates.name.familyName + " " + contactWithUpdates.name.givenName);
+      }
+
+      if (!contactFound || !contactFound[0]) {
          let contactToReturn;
          // name didn't match, try phone numbers
          if (contactWithUpdates.phoneNumbers) {
@@ -229,7 +235,18 @@ export class ContactsService {
     * Do not use directly, use findContactByNameThenNumber 
     */
    private async findContactByNumber(numberToSearch: string): Promise<Contact[]> {
-      console.log("findContactByNumber");
+      if (this.currentPlatform === 'ios') {
+         // required format (XXX) YYY-ZZZZ
+         numberToSearch = this.convertPhoneNumberToStandardFormatExcludeCountry(numberToSearch);
+         // console.log("ios formatted: " + numberToSearch);
+      } else if (this.currentPlatform === 'android') {
+         // add wildcards XXX%YYY%ZZZZ
+         var numberArray = this.normalizePhoneNumberAsStringArray([numberToSearch]);
+         numberToSearch = numberArray[0];
+         numberToSearch = numberToSearch.slice(0, 3) + "%" + numberToSearch.slice(3, 6) + "%" + numberToSearch.slice(6);
+         // console.log("android formatted: " + numberToSearch);
+      }
+
       var opts = {
          filter: numberToSearch,
          multiple: false,
@@ -264,7 +281,7 @@ export class ContactsService {
    normalizePhoneNumberAsContactField(numbersToNormalize: Array<any>) {
       return numbersToNormalize.map(numStr => {
          if (numStr.value != null && numStr != undefined) {
-            numStr.value = numStr.value.replace(/\D/g, '');
+            numStr.value = this.stripAllNonNumberCharacters(numStr.value);
             if (numStr.value.length === 11) {
                //remove country code 
                numStr.value = numStr.value.substring(1);
@@ -276,13 +293,39 @@ export class ContactsService {
 
    normalizePhoneNumberAsStringArray(numbersToNormalize: Array<string>) {
       return numbersToNormalize.map(numStr => {
-         numStr = numStr.replace(/\D/g, '');
+         numStr = this.stripAllNonNumberCharacters(numStr);
          if (numStr.length === 11) {
             //remove country code 
             numStr = numStr.substring(1);
          }
          return numStr;
       });
+   }
+
+   // Limitation: currently only supports US 10 digit phone numbers, removes country code and non-numeric characters
+   convertPhoneNumberToStandardFormatExcludeCountry(numberToConvert: string) {
+      numberToConvert = this.stripAllNonNumberCharacters(numberToConvert);
+      if (numberToConvert.length === 11) {
+         //remove country code 
+         numberToConvert = numberToConvert.substring(1);
+      }
+      return "(" + numberToConvert.slice(0, 3) + ") " + numberToConvert.slice(3, 6) + "-" + numberToConvert.slice(6);
+   }
+
+   // +1 (XXX) YYY-ZZZZ
+   // Limitation: currently only supports single digit country codes
+   convertPhoneNumberToStandardFormatWithCountry(numberToConvert: string) {
+      numberToConvert = this.stripAllNonNumberCharacters(numberToConvert);
+      if (numberToConvert.length === 11) {
+         numberToConvert = "+" + numberToConvert.slice(0, 1) + " (" + numberToConvert.slice(1, 4) + ") " + numberToConvert.slice(4, 7) + "-" + numberToConvert.slice(7);
+      } else {
+         numberToConvert = this.convertPhoneNumberToStandardFormatExcludeCountry(numberToConvert);
+      }
+      return numberToConvert;
+   }
+
+   stripAllNonNumberCharacters(numberToStrip: string) {
+      return numberToStrip.replace(/\D/g, '');
    }
 
    trimContactFieldItems(itemsToNormalize: Array<any>, baseFieldName: string = 'value') {
