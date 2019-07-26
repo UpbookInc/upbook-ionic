@@ -64,7 +64,7 @@ export class ContactsService {
 
    async updateContact(contactWithUpdates: Contact): Promise<any> {
       try {
-         let contactFound: any = await this.findContactByNameThenNumber(contactWithUpdates);
+         let contactFound: any = await this.findContactById(contactWithUpdates.id);
 
          this.debugService.add("ContactsService.updateContact: Contact found");
          //this.debugService.add(contactFound);
@@ -176,6 +176,11 @@ export class ContactsService {
 
    async findContactByNameThenNumber(contactWithUpdates): Promise<Contact[]> {
       let contactFound = await this.findContactByName(contactWithUpdates.displayName);
+      if (!contactFound || !contactFound[0]) {
+         //try again with last name first
+         contactFound = await this.findContactByName(contactWithUpdates.name.familyName + " " + contactWithUpdates.name.givenName);
+      }
+
       if (!contactFound || !contactFound[0]) {
          let contactToReturn;
          // name didn't match, try phone numbers
