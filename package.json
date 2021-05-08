@@ -46,7 +46,7 @@
     "cordova-sqlite-storage": "^3.0.0",
     "core-js": "^2.5.4",
     "ionic-plugin-deeplinks": "^1.0.17",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.21",
     "rxjs": "~6.3.3",
     "rxjs-compat": "^6.3.3",
     "zone.js": "~0.8.26"
